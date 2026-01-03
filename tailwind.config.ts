@@ -19,9 +19,13 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          dark: '#0b0b0b',
+          primary: '#302d2d',
+          secondary: '#ffffff',
+          accent: '#d77723',
           gray: '#6b6b6b',
+          dark: '#302d2d',
           light: '#f5f5f5',
+          menu: '#3b3838',
         },
         border: '#e5e7eb',
       },

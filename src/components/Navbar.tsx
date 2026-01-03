@@ -4,15 +4,17 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import { useState } from 'react'
+import Image from 'next/image'
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Sejarah', href: '/sejarah' },
-  { label: 'Press', href: '/press' },
+  { label: 'History', href: '/sejarah' },
+  { label: 'Organization', href: '/about' },
+  { label: 'Member', href: '/member' },
   { label: 'Event', href: '/event' },
-  { label: 'Galeri', href: '/galeri' },
-  { label: 'Contact', href: '/contact' },
+  { label: 'Merchant', href: '/merchant' },
+  { label: 'Press Release', href: '/press' },
+  { label: 'All About W202', href: '/w202' },
 ]
 
 export default function Navbar() {
@@ -20,92 +22,85 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-border">
-      <div className="container h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-brand-primary">
+      {/* Header Top - Logo, Title, Flag */}
+      <div className="container py-4 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="font-heading text-lg tracking-wide">
-          MB W202 CLUB
-        </Link>
+        <div className="flex items-center gap-3">
+          <Image 
+            src="/logo.png" 
+            alt="MB W202 Club Logo" 
+            width={60} 
+            height={60}
+            className="w-12 h-12 md:w-15 md:h-15"
+          />
+          <div className="flex flex-col">
+            <h1 className="font-heading text-white text-lg md:text-xl lg:text-2xl tracking-wide">
+              Mercedes Benz W202
+            </h1>
+            <p className="text-gray-400 text-xs md:text-sm">
+              Club Indonesia
+            </p>
+          </div>
+        </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={clsx(
-                  'text-sm uppercase tracking-wide transition-colors duration-300',
-                  isActive
-                    ? 'text-brand-dark font-semibold'
-                    : 'text-brand-gray hover:text-brand-dark'
-                )}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
+        {/* Flag */}
+        <div className="hidden md:block">
+          <Image 
+            src="/flag-indonesia.png" 
+            alt="Indonesia Flag" 
+            width={40} 
+            height={27}
+            className="w-10 h-auto"
+          />
+        </div>
 
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden p-2 text-brand-dark"
+          className="md:hidden text-white p-2"
           aria-label="Toggle menu"
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {isMenuOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             )}
           </svg>
         </button>
       </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden border-t border-border">
-          <nav className="container py-4 flex flex-col gap-4">
+      {/* Navigation Menu */}
+      <nav className={clsx(
+        "bg-brand-menu border-t border-brand-primary/20",
+        isMenuOpen ? "block" : "hidden md:block"
+      )}>
+        <div className="container">
+          <ul className="flex flex-col md:flex-row md:items-center md:gap-0">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.href
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={clsx(
-                    'text-sm uppercase tracking-wide transition-colors duration-300 py-2',
-                    isActive
-                      ? 'text-brand-dark font-semibold'
-                      : 'text-brand-gray hover:text-brand-dark'
-                  )}
-                >
-                  {item.label}
-                </Link>
+                <li key={item.href} className="border-b border-brand-primary/10 md:border-0">
+                  <Link
+                    href={item.href}
+                    className={clsx(
+                      'block px-4 py-3 text-sm transition-colors duration-300 capitalize',
+                      isActive
+                        ? 'bg-brand-accent text-white font-medium'
+                        : 'text-white hover:bg-brand-accent hover:text-white'
+                    )}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
               )
             })}
-          </nav>
+          </ul>
         </div>
-      )}
+      </nav>
     </header>
   )
 }
