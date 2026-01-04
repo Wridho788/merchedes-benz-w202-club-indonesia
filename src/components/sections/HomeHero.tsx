@@ -46,7 +46,7 @@ export default function HomeHero() {
   }
 
   return (
-    <section className="relative h-[500px] md:h-[600px] lg:h-[700px] overflow-hidden">
+    <section className="relative h-[700px] md:h-[600px] lg:h-[700px] overflow-hidden">
       {/* Slides */}
       {HERO_SLIDES.map((slide, index) => (
         <div
@@ -69,8 +69,8 @@ export default function HomeHero() {
       ))}
 
       {/* Hero Content */}
-      <div className="absolute inset-0 z-10 flex items-center">
-        <div className="container">
+      <div className="relative z-30 container mx-auto px-4 flex flex-col justify-end min-h-[700px]">
+      
           <div className="mb-1 md:mb-2">
             <div className="max-w-2xl text-white mb-10 md:mb-0 bg-gray-900/15 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-white/10">
               <div className="mb-4">
@@ -103,9 +103,6 @@ export default function HomeHero() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
@@ -141,6 +138,8 @@ export default function HomeHero() {
           />
         ))}
       </div>
+      </div>
+
     </section>
   )
 }

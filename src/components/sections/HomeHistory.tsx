@@ -12,100 +12,68 @@ interface Milestone {
   highlightedText: string;
 }
 
-const MILESTONES: Milestone[] = [
-  {
-    id: 1,
-    title:
-      "Keputusan Menteri Hukum Republik Indonesia tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
-    date: "May 2025",
-    location: "Jakarta",
-    description:
-      "Keputusan Menteri Hukum Republik Indonesia Nomor AHU-0002887.AH.01.07.TAHUN 2025 Tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA: Menetapkan memberikan pengesahan Perkumpulan: MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA Berkedudukan di JAKARTA SELATAN, sesuai salinan Akta Nomor 03 Tanggal 10 Maret 2025 yang dibuat oleh MUHAMMAD SYARIF UMAR S.H., M.KN.,, yang berkedudukan di KOTA DEPOK",
-    highlightedText:
-      "Keputusan Menteri Hukum Republik Indonesia Nomor AHU-0002887.AH.01.07.TAHUN 2025 Tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA:",
-  },
-  {
-    id: 2,
-    title:
-      "Akta Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
-    date: "March 2025",
-    location: "Jakarta",
-    description:
-      "Akta Pendirian Perkumpulan ditandatangani untuk proses pengajuan Badan Hukum Perkumpulan MBW202CI yang dibuat oleh MUHAMMAD SYARIF UMAR S.H., M.KN., Notaris di Kota Depok dengan Akta Nomor 03 Tanggal 10 Maret 2025, yang mencakup Anggaran Dasar dan Anggaran Rumah Tangga perkumpulan.",
-    highlightedText:
-      "Akta Pendirian Perkumpulan ditandatangani untuk proses pengajuan Badan Hukum Perkumpulan MBW202CI",
-  },
-  {
-    id: 3,
-    title:
-      "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia",
-    date: "September 2024",
-    location: "Sentul, Jawa Barat",
-    description:
-      "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia yang diselenggarakan bersamaan pada acara Autospeed Festival di Sentul International Circuit yang dihadiri oleh seluruh pengurus dan anggota club mobil Mercedes-Benz di Indonesia sebagai bentuk penguatan komunitas otomotif nasional.",
-    highlightedText:
-      "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia",
-  },
-  {
-    id: 4,
-    title: "Gathering Nasional ke-15 MBW202CI",
-    date: "July 2022",
-    location: "Bali",
-    description:
-      "Gathering Nasional ke-15 yang diselenggarakan di Pulau Dewata Bali dengan tema 'Unity in Diversity' dihadiri oleh lebih dari 200 anggota dari berbagai region di Indonesia. Acara ini menandai 15 tahun perjalanan klub dengan berbagai kegiatan touring, pameran, dan diskusi teknis seputar perawatan Mercedes-Benz W202.",
-    highlightedText: "Gathering Nasional ke-15 MBW202CI di Bali",
-  },
-  {
-    id: 5,
-    title: "Pembentukan Region Yogyakarta",
-    date: "January 2020",
-    location: "Yogyakarta",
-    description:
-      "Peresmian MBW202CI Region Yogyakarta sebagai region ke-9 yang dibentuk untuk memperluas jangkauan dan memperkuat solidaritas antar anggota di wilayah Daerah Istimewa Yogyakarta. Region ini aktif mengadakan kegiatan rutin bulanan dan bakti sosial kepada masyarakat.",
-    highlightedText: "Pembentukan Region Yogyakarta sebagai region ke-9",
-  },
-  {
-    id: 6,
-    title: "Kerjasama dengan Mercedes-Benz Indonesia",
-    date: "March 2015",
-    location: "Jakarta",
-    description:
-      "Penandatanganan Memorandum of Understanding (MoU) dengan PT Mercedes-Benz Distribution Indonesia sebagai mitra strategis dalam berbagai kegiatan otomotif, termasuk test drive, product launch, dan event khusus untuk pemilik Mercedes-Benz di Indonesia. Kerjasama ini memperkuat posisi MBW202CI sebagai komunitas resmi.",
-    highlightedText:
-      "Penandatanganan MoU dengan PT Mercedes-Benz Distribution Indonesia",
-  },
-  {
-    id: 7,
-    title: "Musyawarah Nasional Pertama",
-    date: "February 2008",
-    location: "Sentul",
-    description:
-      "Musyawarah Nasional pertama diselenggarakan pada tanggal 17 Februari 2008 di Sentul untuk menyempurnakan Anggaran Dasar dan Anggaran Rumah Tangga (AD/ART) yang telah dibuat saat pendirian. Munas ini juga menetapkan struktur organisasi yang lebih solid dan program kerja jangka panjang untuk pengembangan klub.",
-    highlightedText: "Musyawarah Nasional pertama untuk menyempurnakan AD/ART",
-  },
-];
-
 export default function HomeHistory() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [showAll, setShowAll] = useState(false);
 
-  const displayedMilestones = showAll ? MILESTONES : MILESTONES.slice(0, 5);
+  const milestones: Milestone[] = [
+    {
+      id: 1,
+      title: "Keputusan Menteri Hukum Republik Indonesia tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
+      date: "May 2025",
+      location: "Jakarta",
+      description: "Keputusan Menteri Hukum Republik Indonesia Nomor AHU-0002887.AH.01.07.TAHUN 2025 Tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA: Menetapkan memberikan pengesahan Perkumpulan: MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA Berkedudukan di JAKARTA SELATAN, sesuai salinan Akta Nomor 03 Tanggal 10 Maret 2025 yang dibuat oleh MUHAMMAD SYARIF UMAR S.H., M.KN.,, yang berkedudukan di KOTA DEPOK",
+      highlightedText: ""
+    },
+    {
+      id: 2,
+      title: "Akta Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
+      date: "March 2025",
+      location: "Jakarta",
+      description: "Akta Pendirian Perkumpulan disusun untuk proses pengajuan Badan Hukum Perkumpulan",
+      highlightedText: ""
+    },
+    {
+      id: 3,
+      title: "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia",
+      date: "September 2023",
+      location: "Sentul, Bogor Jawa Barat",
+      description: "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia yang diselenggarakan bertepatan pada acara Autospeed Festival di Sentul Internasional Circuit pada 2 September 2023 sekaligus Pemecahan Rekor Muri 1000 Mercedes Benz berkumpul dan berparade.",
+      highlightedText: ""
+    },
+    {
+      id: 4,
+      title: "Revisi Anggaran Dasar Mercedes-Benz Club Indonesia yang Mengakomodasi Keberadaan Pengurus Pusat Club Variant",
+      date: "June 2023",
+      location: "Bogor Jawa Barat",
+      description: "Pada Munas X Mercedes-Benz Club Indonesia yang berlangsung di Bogor 24 Juni 2023 telah dilakukan revisi Anggaran Dasar yang mengakomodir keberadaan Pengurus Pusat Club Variant seperti MBW202CI.",
+      highlightedText: ""
+    },
+    {
+      id: 5,
+      title: "MBW202CI District 04.2 Solo Berdiri",
+      date: "February 2016",
+      location: "Solo Jawa Tengah",
+      description: "Pengukuhan pendirian MBW202CI District 04.2 Solo.",
+      highlightedText: ""
+    }
+  ];
+
+  const toggleExpand = (id: number) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
 
   return (
-    <section className="py-12 md:py-16 lg:py-24 bg-white">
-      <div className="container">
-        {/* Section Title */}
-        <div className="mb-8 md:mb-12 text-center">
-          <h2 className="text-3xl md:text-4xl font-heading text-brand-primary inline-block">
+    <section className="py-4 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-sans font-bold text-brand-primary">
             History
-            <div className="h-1 bg-brand-accent w-24 mx-auto mt-4 mb-6"></div>
           </h2>
+          <div className="w-24 h-1 bg-brand-accent mx-auto mt-4 mb-6"></div>
         </div>
-
-        {/* History Paragraphs */}
-        <div className="prose max-w-none mb-12 md:mb-16">
+        <div className="bg-gray-200 rounded-lg shadow-md p-6 md:p-8">
           <div className="max-w-3xl mx-auto mb-8">
-            <p className="text-brand-gray leading-relaxed mb-4">
+            <p className="text-gray-700 leading-relaxed text-justify">
               Mercedes Benz W202 Club Indonesia (MBW202CI) resmi didirikan pada
               7 Juli 2007 oleh enam orang pendiri yang merupakan pemilik dan
               penggemar Mercedes-Benz tipe W202. MBW202CI dideklarasikan dalam
@@ -114,8 +82,7 @@ export default function HomeHistory() {
               kemudian disempurnakan dalam Musyawarah Nasional pertama pada 17
               Februari 2008 di Sentul.
             </p>
-
-            <p className="text-brand-gray leading-relaxed mb-4">
+            <p className="text-gray-700 leading-relaxed mt-4 text-justify">
               Visi utamanya adalah menghimpun dan menyatukan pemilik/penggemar
               W202 di seluruh Indonesia. Saat ini, MBW202CI telah memiliki lebih
               dari 1000 anggota dan memperluas jangkauan dengan membentuk
@@ -123,8 +90,7 @@ export default function HomeHistory() {
               Jakarta, Bandung, Surabaya, Malang, Semarang, Pekalongan, Solo,
               Medan, dan Yogyakarta.
             </p>
-
-            <p className="text-brand-gray leading-relaxed mb-4">
+            <p className="text-gray-700 leading-relaxed mt-4 text-justify">
               MBW202CI menjadi anggota Mercedes-Benz Club Indonesia (MB Club
               INA), organisasi induk resmi yang mewadahi berbagai klub pecinta
               dan pemilik mobil Mercedes-Benz di seluruh Indonesia, dengan
@@ -136,132 +102,102 @@ export default function HomeHistory() {
               modern.
             </p>
           </div>
-        </div>
-
-        {/* Milestones Section */}
-        <div className="border-t border-gray-200 pt-6 mb-4">
-          <h3 className="text-xl font-semibold  text-center  text-brand-primary mb-6 md:mb-8">
-            Tonggak Sejarah Kami
-          </h3>
-
-          <div className="space-y-4">
-            {displayedMilestones.map((milestone) => (
-              <div
-                key={milestone.id}
-                className="border-l-4 border-brand-accent bg-gray-50 rounded-r-lg overflow-hidden"
-              >
-                <div className="p-4 md:p-6">
-                  <div className="flex items-start justify-between gap-4">
+          <div className="border-t border-gray-200 pt-6 mb-4">
+            <h3 className="text-xl font-semibold text-brand-primary text-center mb-6">
+              Tonggak Sejarah Kami
+            </h3>
+          </div>
+          <div className="relative pl-8 border-l-2 border-brand-accent space-y-12 max-w-3xl mx-auto">
+            {milestones.map((milestone) => (
+              <div key={milestone.id} className="timeline-entry relative">
+                <div className="absolute -left-[25px] mt-1 w-6 h-6 rounded-full bg-brand-accent z-10 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-white"></div>
+                </div>
+                <div className="bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all duration-300 hover:shadow-lg">
+                  <div 
+                    className="flex justify-between items-start"
+                    onClick={() => toggleExpand(milestone.id)}
+                  >
                     <div className="flex-1">
-                      <h4 className="font-heading text-brand-primary text-lg md:text-xl mb-2">
+                      <h3 className="font-sans font-semibold text-xl text-brand-primary">
                         {milestone.title}
-                      </h4>
-                      <div className="flex flex-wrap gap-3 text-sm text-brand-gray mb-3">
-                        <span className="flex items-center gap-1">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                          {milestone.date}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          {milestone.location}
-                        </span>
-                      </div>
-
-                      {expandedId === milestone.id && (
-                        <div className="text-brand-gray leading-relaxed">
-                          <p className="mb-2">
-                            {
-                              milestone.description.split(
-                                milestone.highlightedText
-                              )[0]
-                            }
-                            <strong className="text-brand-primary">
-                              {milestone.highlightedText}
-                            </strong>
-                            {
-                              milestone.description.split(
-                                milestone.highlightedText
-                              )[1]
-                            }
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() =>
-                        setExpandedId(
-                          expandedId === milestone.id ? null : milestone.id
-                        )
-                      }
-                      className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-brand-accent hover:bg-brand-accent/10 rounded-full transition-colors"
-                      aria-label={
-                        expandedId === milestone.id ? "Collapse" : "Expand"
-                      }
-                    >
-                      <svg
-                        className={clsx(
-                          "w-5 h-5 transition-transform",
-                          expandedId === milestone.id && "rotate-180"
-                        )}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
+                      </h3>
+                      <div className="flex flex-wrap items-center text-sm text-brand-accent mb-2 mt-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
+                          className="w-4 h-4 mr-1"
+                        >
+                          <path d="M8 2v4"></path>
+                          <path d="M16 2v4"></path>
+                          <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                          <path d="M3 10h18"></path>
+                        </svg>
+                        <span>{milestone.date}</span>
+                        <div className="flex items-center ml-4">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4 mr-1"
+                          >
+                            <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                          </svg>
+                          <span>{milestone.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="text-gray-500 ml-2 flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={clsx(
+                          "w-5 h-5 transition-transform duration-300",
+                          expandedId === milestone.id && "rotate-180"
+                        )}
+                      >
+                        <path d="m6 9 6 6 6-6"></path>
                       </svg>
                     </button>
                   </div>
+                  <p className={clsx(
+                    "text-gray-700 mt-2",
+                    expandedId !== milestone.id && "line-clamp-2"
+                  )}>
+                    {milestone.description}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
-
-          {!showAll && MILESTONES.length > 5 && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={() => setShowAll(true)}
-                className="px-6 py-3 border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white transition-colors rounded-lg font-medium"
-              >
+          <div className="text-center mt-8">
+            <a href="/sejarah">
+              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bg-brand-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white h-10 px-6 py-2 border border-brand-primary text-brand-primary rounded font-medium hover:bg-brand-accent hover:text-white">
                 Selengkapnya
               </button>
-            </div>
-          )}
+            </a>
+          </div>
         </div>
       </div>
     </section>
