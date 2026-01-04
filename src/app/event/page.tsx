@@ -6,7 +6,16 @@ import { eventData } from '@/data/event'
 
 export const metadata: Metadata = {
   title: 'Event',
-  description: 'Event dan kegiatan mendatang dari Mercedes-Benz W202 Club Indonesia',
+  description: 'Event dan kegiatan mendatang dari Mercedes-Benz W202 Club Indonesia - Gathering, touring, dan acara komunitas',
+  keywords: ['Event W202', 'Gathering W202', 'Kegiatan W202 Club', 'W202 Touring'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | Event',
+    description: 'Event dan kegiatan dari Mercedes-Benz W202 Club Indonesia',
+    url: 'https://mbw202club.id/event',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    locale: 'id_ID',
+    type: 'website',
+  },
 }
 
 export default function EventPage() {

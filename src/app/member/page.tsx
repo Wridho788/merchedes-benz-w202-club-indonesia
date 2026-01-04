@@ -1,3 +1,20 @@
+import type { Metadata } from 'next'
+import Section from '@/components/ui/Section'
+
+export const metadata: Metadata = {
+  title: 'Member',
+  description: 'Anggota Mercedes-Benz W202 Club Indonesia - Bergabunglah dengan komunitas pecinta W202',
+  keywords: ['Member W202', 'Anggota W202 Club', 'Join W202 Indonesia'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | Member',
+    description: 'Daftar anggota dan cara bergabung dengan Mercedes-Benz W202 Club Indonesia',
+    url: 'https://mbw202club.id/member',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    locale: 'id_ID',
+    type: 'website',
+  },
+}
+
 export default function MemberPage() {
   return (
     <div className="content">

@@ -17,8 +17,8 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: {
-    default: 'MB W202 Club Indonesia',
-    template: '%s | MB W202 Club Indonesia',
+    default: 'Mercedes Benz W202 Club Indonesia',
+    template: '%s | Mercedes Benz W202 Club Indonesia',
   },
   description:
     'Mercedes-Benz W202 Club Indonesia adalah komunitas pecinta Mercedes-Benz seri W202 di Indonesia.',

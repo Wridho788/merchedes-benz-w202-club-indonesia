@@ -5,8 +5,17 @@ import Card from '@/components/ui/Card'
 import { pressData } from '@/data/press'
 
 export const metadata: Metadata = {
-  title: 'Press',
-  description: 'Berita dan artikel terbaru dari Mercedes-Benz W202 Club Indonesia',
+  title: 'Press Release',
+  description: 'Berita dan artikel terbaru dari Mercedes-Benz W202 Club Indonesia - Update kegiatan dan liputan media',
+  keywords: ['Press Release W202', 'Berita W202 Club', 'Artikel W202', 'Media W202 Indonesia'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | Press Release',
+    description: 'Berita dan artikel terbaru dari Mercedes-Benz W202 Club Indonesia',
+    url: 'https://mbw202club.id/press',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    locale: 'id_ID',
+    type: 'website',
+  },
 }
 
 export default function PressPage() {

@@ -4,7 +4,16 @@ import Card from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: 'Contact',
-  description: 'Hubungi Mercedes-Benz W202 Club Indonesia untuk informasi lebih lanjut',
+  description: 'Hubungi Mercedes-Benz W202 Club Indonesia untuk informasi lebih lanjut - Email, telepon, dan media sosial',
+  keywords: ['Kontak W202 Club', 'Hubungi W202 Indonesia', 'Contact W202'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | Contact',
+    description: 'Hubungi Mercedes-Benz W202 Club Indonesia',
+    url: 'https://mbw202club.id/contact',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    locale: 'id_ID',
+    type: 'website',
+  },
 }
 
 export default function ContactPage() {

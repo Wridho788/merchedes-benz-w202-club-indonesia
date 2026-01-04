@@ -4,7 +4,16 @@ import Card from '@/components/ui/Card'
 
 export const metadata: Metadata = {
   title: 'Galeri',
-  description: 'Dokumentasi kegiatan dan momen berharga MB W202 Club Indonesia',
+  description: 'Dokumentasi kegiatan dan momen berharga MB W202 Club Indonesia - Foto gathering, touring, dan event',
+  keywords: ['Galeri W202', 'Foto W202 Club', 'Dokumentasi W202', 'Gallery W202 Indonesia'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | Galeri',
+    description: 'Dokumentasi visual kegiatan Mercedes-Benz W202 Club Indonesia',
+    url: 'https://mbw202club.id/galeri',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    locale: 'id_ID',
+    type: 'website',
+  },
 }
 
 const galleryItems = [

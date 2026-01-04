@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import HomeHero from '@/components/sections/HomeHero'
 import HomeHistory from '@/components/sections/HomeHistory'
 import HomeCommunity from '@/components/sections/HomeCommunity'
@@ -6,6 +7,32 @@ import HomeEvent from '@/components/sections/HomeEvent'
 import HomePressRelease from '@/components/sections/HomePressRelease'
 import HomeFeaturedMembers from '@/components/sections/HomeFeaturedMembers'
 import HomeCTA from '@/components/sections/HomeCTA'
+
+export const metadata: Metadata = {
+  title: 'Beranda',
+  description: 'Mercedes-Benz W202 Club Indonesia - Komunitas resmi pecinta Mercedes-Benz seri W202 di Indonesia yang berdiri sejak tahun 2007',
+  keywords: ['Mercedes Benz W202', 'W202 Club Indonesia', 'Mercedes C-Class', 'Komunitas Mercedes', 'W202 Indonesia'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | Beranda',
+    description: 'Komunitas resmi pecinta Mercedes-Benz seri W202 di Indonesia yang berdiri sejak tahun 2007',
+    url: 'https://mbw202club.id',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    images: [{
+      url: '/hero-1.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'Mercedes Benz W202 Club Indonesia',
+    }],
+    locale: 'id_ID',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Mercedes Benz W202 Club Indonesia | Beranda',
+    description: 'Komunitas resmi pecinta Mercedes-Benz seri W202 di Indonesia',
+    images: ['/hero-1.jpg'],
+  },
+}
 
 export default function Home() {
   return (

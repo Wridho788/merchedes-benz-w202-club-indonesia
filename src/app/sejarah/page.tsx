@@ -2,8 +2,17 @@ import type { Metadata } from 'next'
 import Section from '@/components/ui/Section'
 
 export const metadata: Metadata = {
-  title: 'Sejarah',
-  description: 'Sejarah Mercedes-Benz W202 dan perjalanan komunitas W202 Club Indonesia',
+  title: 'History',
+  description: 'Sejarah Mercedes-Benz W202 dan perjalanan komunitas W202 Club Indonesia sejak tahun 1993',
+  keywords: ['Sejarah W202', 'Mercedes C-Class History', 'W202 Club Indonesia History'],
+  openGraph: {
+    title: 'Mercedes Benz W202 Club Indonesia | History',
+    description: 'Sejarah Mercedes-Benz W202 dan perjalanan komunitas W202 Club Indonesia',
+    url: 'https://mbw202club.id/sejarah',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    locale: 'id_ID',
+    type: 'website',
+  },
 }
 
 export default function SejarahPage() {

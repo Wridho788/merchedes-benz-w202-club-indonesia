@@ -68,6 +68,44 @@ export default function HomeHero() {
         </div>
       ))}
 
+      {/* Hero Content */}
+      <div className="absolute inset-0 z-10 flex items-center">
+        <div className="container">
+          <div className="mb-1 md:mb-2">
+            <div className="max-w-2xl text-white mb-10 md:mb-0 bg-gray-900/15 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-white/10">
+              <div className="mb-4">
+                <h1 className="font-serif text-3xl md:text-5xl text-white">
+                  Mercedes Benz W202
+                </h1>
+                <h2 className="font-serif text-2xl md:text-4xl text-white">
+                  Club Indonesia
+                </h2>
+              </div>
+              <p className="font-sans text-sm md:text-base mb-5 text-white max-w-xl">
+                Komunitas resmi pecinta Mercedes-Benz W202 di Indonesia yang berdiri sejak tahun 2007. 
+                Bergabunglah dengan kami untuk berbagi passion dan pengalaman bersama.
+              </p>
+              <div className="flex space-x-3">
+                <a 
+                  data-testid="link-join" 
+                  href="/member" 
+                  className="bg-brand-accent hover:bg-opacity-90 text-white py-2 px-4 rounded text-sm font-sans font-medium transition duration-300"
+                >
+                  Bergabung
+                </a>
+                <a 
+                  data-testid="link-about" 
+                  href="/sejarah" 
+                  className="border border-white text-white hover:bg-white hover:text-brand-primary py-2 px-4 rounded text-sm font-sans font-medium transition duration-300"
+                >
+                  Tentang Kami
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}

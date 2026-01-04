@@ -22,85 +22,110 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-primary">
-      {/* Header Top - Logo, Title, Flag */}
-      <div className="container py-4 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <Image 
-            src="/logo.png" 
-            alt="MB W202 Club Logo" 
-            width={60} 
-            height={60}
-            className="w-12 h-12 md:w-15 md:h-15"
-          />
-          <div className="flex flex-col">
-            <h1 className="font-heading text-white text-lg md:text-xl lg:text-2xl tracking-wide">
-              Mercedes Benz W202
-            </h1>
-            <p className="text-gray-400 text-xs md:text-sm">
-              Club Indonesia
-            </p>
+    <header className="sticky top-0 z-50 bg-brand-primary shadow-md">
+      {/* Main Navbar - 2 Columns Layout */}
+      <div className="container">
+        <div className="flex items-center justify-between py-4">
+          {/* Left Column - Logo, Title, Flag */}
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" 
+              alt="MB W202 Club Logo" 
+              width={60} 
+              height={60}
+              className="w-12 h-12 md:w-15 md:h-15"
+            />
+            <div className="flex flex-col">
+              <h1 className="font-heading text-white text-lg md:text-xl lg:text-2xl tracking-wide">
+                Mercedes Benz W202
+              </h1>
+              <p className="text-gray-400 text-xs md:text-sm">
+                Club Indonesia
+              </p>
+            </div>
+            
+            {/* Flag */}
+            <div className="ml-3 hidden md:flex items-center">
+              <div className="flag-animation">
+                <div className="w-12 h-8 md:w-14 md:h-9 relative overflow-hidden rounded shadow-md">
+                  <div className="absolute top-0 left-0 right-0 h-1/2 bg-red-600"></div>
+                  <div className="absolute top-1/2 left-0 right-0 h-1/2 bg-white"></div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Flag */}
-        <div className="hidden md:block">
-          <Image 
-            src="/flag-indonesia.png" 
-            alt="Indonesia Flag" 
-            width={40} 
-            height={27}
-            className="w-10 h-auto"
-          />
-        </div>
+          {/* Right Column - Desktop Menu */}
+          <nav className="hidden md:block">
+            <ul className="flex items-center gap-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden text-white p-2"
-          aria-label="Toggle menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {isMenuOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={clsx(
+                        'block px-4 py-2 text-sm transition-colors duration-300 capitalize rounded',
+                        isActive
+                          ? 'text-brand-accent font-medium'
+                          : 'text-white hover:text-brand-accent'
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-white p-2"
+            aria-label="Toggle menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Navigation Menu */}
-      <nav className={clsx(
-        "bg-brand-menu border-t border-brand-primary/20",
-        isMenuOpen ? "block" : "hidden md:block"
-      )}>
-        <div className="container">
-          <ul className="flex flex-col md:flex-row md:items-center md:gap-0">
-            {NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href
+      {/* Mobile Navigation Menu */}
+      {isMenuOpen && (
+        <nav className="md:hidden bg-brand-menu border-t border-brand-primary/20">
+          <div className="container">
+            <ul className="py-2">
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href
 
-              return (
-                <li key={item.href} className="border-b border-brand-primary/10 md:border-0">
-                  <Link
-                    href={item.href}
-                    className={clsx(
-                      'block px-4 py-3 text-sm transition-colors duration-300 capitalize',
-                      isActive
-                        ? 'bg-brand-accent text-white font-medium'
-                        : 'text-white hover:bg-brand-accent hover:text-white'
-                    )}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      </nav>
+                return (
+                  <li key={item.href} className="border-b border-brand-primary/10 last:border-0">
+                    <Link
+                      href={item.href}
+                      className={clsx(
+                        'block px-4 py-3 text-sm transition-colors duration-300 capitalize',
+                        isActive
+                          ? 'text-brand-accent font-medium'
+                          : 'text-white hover:text-brand-accent'
+                      )}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </nav>
+      )}
     </header>
   )
 }
