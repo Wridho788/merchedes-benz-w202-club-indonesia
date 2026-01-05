@@ -37,7 +37,7 @@ const FEATURED_MEMBERS = [
     region: "Region 01 Jakarta",
     car: "W202 C180 Esprit1994",
     memberSince: "2007",
-    image: "/images/member-default.jpg",
+    image: "/Pic-1.jpg",
     youtubeUrl: "https://youtu.be/DpC6ogOXdag?si=qA2JFk5NXUcDZ6fn"
   },
   {
@@ -46,7 +46,7 @@ const FEATURED_MEMBERS = [
     region: "Region 01 Jakarta",
     car: "W202 Brabus B2 Full Modification",
     memberSince: "2009",
-    image: "/images/member-default.jpg",
+    image: "/Pic-2.jpg",
     youtubeUrl: "https://youtu.be/gG_DMCrKFVU?si=LgfryxllesU7BeIk"
   },
   {
@@ -55,7 +55,7 @@ const FEATURED_MEMBERS = [
     region: "Region 03 Surabaya",
     car: "W202 C200 Full Modification",
     memberSince: "2010",
-    image: "https://i.ibb.co.com/8gmbJJLH/Hamzah.jpg",
+    image: "/Pic-3.jpg",
     youtubeUrl: "https://youtu.be/oToC-E3iLuo?si=4FsOZS7GO9VBIBRG"
   }
 ]
