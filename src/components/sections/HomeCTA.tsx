@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomeCTA() {
   return (
-    <section className="py-16 bg-brand-primary">
+    <section className="py-16 bg-brand-dark border-b">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-8 md:mb-0 text-center md:text-left">
@@ -23,7 +23,7 @@ export default function HomeCTA() {
             </a>
             <a
               href="mailto:info@w202clubindonesia.org"
-              className="px-6 py-3 border border-white text-white font-sans font-medium rounded hover:bg-white hover:text-bg-brandPrimary transition duration-300 text-center min-w-[150px]"
+              className="px-6 py-3 border border-white text-white font-sans font-medium rounded hover:bg-white hover:text-brand-primary transition duration-300 text-center min-w-[150px]"
             >
               Hubungi Kami
             </a>
