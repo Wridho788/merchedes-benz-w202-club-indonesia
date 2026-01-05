@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { label: "Event", href: "/event" },
   { label: "Merchant", href: "/merchant" },
   { label: "Press Release", href: "/press" },
-  { label: "All About W202", href: "/w202" },
+  { label: "All About W202", href: "/about" },
 ];
 
 export default function Navbar() {
