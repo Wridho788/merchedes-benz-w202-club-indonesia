@@ -3,6 +3,7 @@ import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+import QueryProvider from '@/lib/providers/query-provider'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -58,9 +59,11 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${montserrat.variable} font-sans`}
       >
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <QueryProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+        </QueryProvider>
       </body>
     </html>
   );

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import clsx from "clsx";
+import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
+import { CHAPTER_ID, CATEGORIES } from "@/lib/constants/api";
 
 interface Milestone {
   id: number;
@@ -14,6 +16,16 @@ interface Milestone {
 
 export default function HomeHistory() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  
+  // Fetch history data from API
+  const { data, isLoading, error } = useArticleIndexWebsite({
+    chapter: CHAPTER_ID,
+    category: CATEGORIES.HISTORY,
+    limit: 10,
+    offset: 0,
+    orderby: "",
+    order: "asc",
+  });
 
   const milestones: Milestone[] = [
     {
@@ -57,6 +69,19 @@ export default function HomeHistory() {
       highlightedText: ""
     }
   ];
+
+  // Map API data to milestones format, or use static data as fallback
+  const apiMilestones = data?.content?.result?.map((item) => ({
+    id: parseInt(item.id),
+    title: item.title || item.name,
+    date: item.date,
+    location: "", // Not provided in API
+    description: item.shortdesc || item.name,
+    highlightedText: "",
+  })) || [];
+
+  // Use API data if available, otherwise use static data
+  const displayMilestones = apiMilestones.length > 0 ? apiMilestones : milestones;
 
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
@@ -108,7 +133,7 @@ export default function HomeHistory() {
             </h3>
           </div>
           <div className="relative pl-8 border-l-2 border-brand-accent space-y-12 max-w-3xl mx-auto">
-            {milestones.map((milestone) => (
+            {displayMilestones.map((milestone) => (
               <div key={milestone.id} className="timeline-entry relative">
                 <div className="absolute -left-[25px] mt-1 w-6 h-6 rounded-full bg-brand-accent z-10 flex items-center justify-center">
                   <div className="w-3 h-3 rounded-full bg-white"></div>

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
+import { CHAPTER_ID, CATEGORIES } from "@/lib/constants/api";
 
 interface Event {
   id: number;
@@ -90,8 +92,29 @@ const EVENTS: Event[] = [
 
 export default function HomeEvent() {
   const [showAll, setShowAll] = useState(false);
+  
+  // Fetch events from API
+  const { data, isLoading, error } = useArticleIndexWebsite({
+    chapter: CHAPTER_ID,
+    category: CATEGORIES.CLUB_EVENT,
+    limit: 10,
+    offset: 0,
+    orderby: "",
+    order: "asc",
+  });
 
-  const displayedEvents = showAll ? EVENTS : EVENTS.slice(0, 6);
+  // Map API data or use static data as fallback
+  const apiEvents = data?.content?.result?.map((item) => ({
+    id: parseInt(item.id),
+    title: item.title || item.name,
+    date: item.date,
+    location: "", // Not provided in API
+    image: item.image || "/hero-1.jpg",
+    slug: item.id,
+  })) || [];
+
+  const events = apiEvents.length > 0 ? apiEvents : EVENTS;
+  const displayedEvents = showAll ? events : events.slice(0, 6);
 
   return (
     <section className="py-4 mt-2 bg-white">
@@ -185,7 +208,7 @@ export default function HomeEvent() {
         </div>
 
         {/* Show More Button */}
-        {!showAll && EVENTS.length > 6 && (
+        {!showAll && events.length > 6 && (
           <div className="mt-10 text-center">
             <button
               onClick={() => setShowAll(true)}

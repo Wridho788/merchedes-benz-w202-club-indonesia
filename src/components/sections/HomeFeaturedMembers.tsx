@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
+import { CHAPTER_ID, CATEGORIES } from "@/lib/constants/api";
 
 interface FeaturedMember {
   id: number;
@@ -58,9 +60,28 @@ const FEATURED_MEMBERS: FeaturedMember[] = [
 export default function HomeFeaturedMembers() {
   const [showAll, setShowAll] = useState(false);
 
-  const displayedMembers = showAll
-    ? FEATURED_MEMBERS
-    : FEATURED_MEMBERS.slice(0, 3);
+  // Fetch featured members from API
+  const { data, isLoading, error } = useArticleIndexWebsite({
+    chapter: CHAPTER_ID,
+    category: CATEGORIES.FEATURED_MEMBER,
+    limit: 10,
+    offset: 0,
+    orderby: "",
+    order: "asc",
+  });
+
+  // Map API data or use static data as fallback
+  const apiMembers = data?.content?.result?.map((item) => ({
+    id: parseInt(item.id),
+    title: item.title || item.name,
+    videoId: item.link || "#",
+    thumbnail: item.image || "https://img.youtube.com/vi/default/mqdefault.jpg",
+    views: item.shortdesc || "",
+    description: item.description || "",
+  })) || [];
+
+  const members = apiMembers.length > 0 ? apiMembers : FEATURED_MEMBERS;
+  const displayedMembers = showAll ? members : members.slice(0, 3);
 
   return (
     <section className="py-4 mt-2 bg-white">
@@ -129,7 +150,7 @@ export default function HomeFeaturedMembers() {
           </div>
 
           {/* Show More Button */}
-          {!showAll && FEATURED_MEMBERS.length > 3 && (
+          {!showAll && members.length > 3 && (
             <div className="mt-10 text-center">
               <button
                 onClick={() => setShowAll(true)}

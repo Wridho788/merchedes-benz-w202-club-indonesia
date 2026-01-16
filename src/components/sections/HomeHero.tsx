@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import clsx from "clsx";
+import { useSliderWebsite } from "@/lib/hooks/useSliderWebsite";
 
 const HERO_SLIDES = [
   {
@@ -24,22 +25,33 @@ const HERO_SLIDES = [
 
 export default function HomeHero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { data, isLoading, error } = useSliderWebsite("10", "0");
+
+  // Use API data if available, otherwise fallback to static data
+  const slides = data?.content?.result?.length
+    ? data.content.result.map((item) => ({
+        id: parseInt(item.id),
+        image: item.image,
+        alt: item.name,
+        url: item.url,
+      }))
+    : HERO_SLIDES;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000); // Auto slide every 5 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
     setCurrentSlide(
-      (prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length
+      (prev) => (prev - 1 + slides.length) % slides.length
     );
   };
 
@@ -50,7 +62,7 @@ export default function HomeHero() {
   return (
     <section className="relative h-[700px] md:h-[600px] lg:h-[700px] overflow-hidden">
       {/* Slides */}
-      {HERO_SLIDES.map((slide, index) => (
+      {slides.map((slide, index) => (
         <div
           key={slide.id}
           className={clsx(
@@ -149,7 +161,7 @@ export default function HomeHero() {
 
         {/* Slide Indicators */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-          {HERO_SLIDES.map((_, index) => (
+          {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}

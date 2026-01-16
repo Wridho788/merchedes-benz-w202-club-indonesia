@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
+import { CHAPTER_ID, CATEGORIES } from "@/lib/constants/api";
 
 interface PressRelease {
   id: number;
@@ -71,9 +73,29 @@ const PRESS_RELEASES: PressRelease[] = [
 export default function HomePressRelease() {
   const [showAll, setShowAll] = useState(false);
 
-  const displayedReleases = showAll
-    ? PRESS_RELEASES
-    : PRESS_RELEASES.slice(0, 3);
+  // Fetch press releases from API
+  const { data, isLoading, error } = useArticleIndexWebsite({
+    chapter: CHAPTER_ID,
+    category: CATEGORIES.PRESS_RELEASE,
+    limit: 10,
+    offset: 0,
+    orderby: "",
+    order: "asc",
+  });
+
+  // Map API data or use static data as fallback
+  const apiReleases = data?.content?.result?.map((item) => ({
+    id: parseInt(item.id),
+    title: item.title || item.name,
+    excerpt: item.shortdesc || item.name,
+    date: item.date,
+    image: item.image || "/hero-1.jpg",
+    slug: item.id,
+    author: "W202 Club Indonesia",
+  })) || [];
+
+  const releases = apiReleases.length > 0 ? apiReleases : PRESS_RELEASES;
+  const displayedReleases = showAll ? releases : releases.slice(0, 3);
 
   return (
     <section className="py-4 mt-2 bg-white">
@@ -147,7 +169,7 @@ export default function HomePressRelease() {
             ))}
           </div>
         {/* Show More Button */}
-        {!showAll && PRESS_RELEASES.length > 3 && (
+        {!showAll && releases.length > 3 && (
           <div className="mt-10 text-center">
             <button
               onClick={() => setShowAll(true)}

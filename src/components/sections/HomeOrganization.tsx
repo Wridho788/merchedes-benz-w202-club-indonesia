@@ -2,11 +2,28 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useChapterById } from "@/lib/hooks/useChapterById";
+import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
+import { CHAPTER_ID, CATEGORIES } from "@/lib/constants/api";
 
 export default function HomeOrganization() {
   const [showFullMessage, setShowFullMessage] = useState(false);
+  
+  // Fetch chapter data for president message
+  const { data: chapterData } = useChapterById(CHAPTER_ID);
+  
+  // Fetch regional activities
+  const { data: activitiesData } = useArticleIndexWebsite({
+    chapter: CHAPTER_ID,
+    category: CATEGORIES.REGIONAL_ACTIVITY,
+    limit: 10,
+    offset: 0,
+    orderby: "",
+    order: "asc",
+  });
 
-  const presidentMessage = `"Mercedes-Benz W202 Club Indonesia adalah Club Otomotif yang mempunyai historia yang panjang. Dari berkembangnya untuk membina Mercedes-Benz W202 Club Indonesia bersama Maju Lebih Jauh dan mempertautkan seluruh Member dari Region dan Distirct untuk menguatkan solidaritas antar anggota, dan menjadis tanur bah wangsa era yang lebih modern, dinamis, tertata guna, dan dikenal secara Nasional maupun Internasional."`;
+  const presidentMessage = chapterData?.content?.desc || `"Mercedes-Benz W202 Club Indonesia adalah Club Otomotif yang mempunyai historia yang panjang. Dari berkembangnya untuk membina Mercedes-Benz W202 Club Indonesia bersama Maju Lebih Jauh dan mempertautkan seluruh Member dari Region dan Distirct untuk menguatkan solidaritas antar anggota, dan menjadis tanur bah wangsa era yang lebih modern, dinamis, tertata guna, dan dikenal secara Nasional maupun Internasional."`;
+  const presidentName = chapterData?.content?.chief || "Hamzah Lutfi Abdat";
 
   const shortMessage = presidentMessage.substring(0, 200) + "...";
 
@@ -37,17 +54,11 @@ export default function HomeOrganization() {
           <div className="md:w-2/3 mt-6 md:mt-0 md:ml-6">
             <blockquote className="text-gray-700 italic relative pl-4 border-l-4 border-brand-accent">
               <p className="text-lg mb-4">
-                "Mercedes-Benz W202 Club Indonesia adalah Club Otomotif yang
-                mempunyai historis yang panjang. Kami berkomitmen untuk membawa
-                Mercedes-Benz W202 Club Indonesia Bersama Melaju Lebih Jauh dan
-                mempersatukan seluruh Member dari Region dan District untuk
-                memperkuat solidaritas antar anggota, dan membawa komunitas
-                menuju era yang lebih modern, dinamis, berdaya guna, dan dikenal
-                secara Nasional maupun Internasional."
+                {presidentMessage}
               </p>
               <footer className="text-right">
                 <cite className="font-medium text-mercedes-blue">
-                  - Hamzah Lutfi Abdat, Presiden MBW202CI
+                  - {presidentName}, Presiden MBW202CI
                 </cite>
               </footer>
             </blockquote>
