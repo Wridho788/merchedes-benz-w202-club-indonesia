@@ -28,6 +28,7 @@ export interface Article {
   islink: boolean;
   link: string | null;
   title: string;
+  text: string;
   date: string;
   lang: string;
   created: string;

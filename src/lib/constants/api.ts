@@ -1,9 +1,9 @@
 // API Base URL
-export const API_BASE_URL = "https://mbapi.dswip.com";
+export const API_BASE_URL = "/api/proxy";
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  SLIDER_WEBSITE: "/slider_website",
+  SLIDER_WEBSITE: "/slider/index_website/13",
   ARTICLE_INDEX_WEBSITE: "/article/index_website",
   CHAPTER_GET_BY_ID: "/chapter/get_by_id",
 } as const;

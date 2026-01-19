@@ -27,48 +27,50 @@ export default function HomeHistory() {
     order: "asc",
   });
 
-  const milestones: Milestone[] = [
-    {
-      id: 1,
-      title: "Keputusan Menteri Hukum Republik Indonesia tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
-      date: "May 2025",
-      location: "Jakarta",
-      description: "Keputusan Menteri Hukum Republik Indonesia Nomor AHU-0002887.AH.01.07.TAHUN 2025 Tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA: Menetapkan memberikan pengesahan Perkumpulan: MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA Berkedudukan di JAKARTA SELATAN, sesuai salinan Akta Nomor 03 Tanggal 10 Maret 2025 yang dibuat oleh MUHAMMAD SYARIF UMAR S.H., M.KN.,, yang berkedudukan di KOTA DEPOK",
-      highlightedText: ""
-    },
-    {
-      id: 2,
-      title: "Akta Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
-      date: "March 2025",
-      location: "Jakarta",
-      description: "Akta Pendirian Perkumpulan disusun untuk proses pengajuan Badan Hukum Perkumpulan",
-      highlightedText: ""
-    },
-    {
-      id: 3,
-      title: "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia",
-      date: "September 2023",
-      location: "Sentul, Bogor Jawa Barat",
-      description: "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia yang diselenggarakan bertepatan pada acara Autospeed Festival di Sentul Internasional Circuit pada 2 September 2023 sekaligus Pemecahan Rekor Muri 1000 Mercedes Benz berkumpul dan berparade.",
-      highlightedText: ""
-    },
-    {
-      id: 4,
-      title: "Revisi Anggaran Dasar Mercedes-Benz Club Indonesia yang Mengakomodasi Keberadaan Pengurus Pusat Club Variant",
-      date: "June 2023",
-      location: "Bogor Jawa Barat",
-      description: "Pada Munas X Mercedes-Benz Club Indonesia yang berlangsung di Bogor 24 Juni 2023 telah dilakukan revisi Anggaran Dasar yang mengakomodir keberadaan Pengurus Pusat Club Variant seperti MBW202CI.",
-      highlightedText: ""
-    },
-    {
-      id: 5,
-      title: "MBW202CI District 04.2 Solo Berdiri",
-      date: "February 2016",
-      location: "Solo Jawa Tengah",
-      description: "Pengukuhan pendirian MBW202CI District 04.2 Solo.",
-      highlightedText: ""
-    }
-  ];
+  console.log("History data:", data);
+
+  // const milestones: Milestone[] = [
+  //   {
+  //     id: 1,
+  //     title: "Keputusan Menteri Hukum Republik Indonesia tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
+  //     date: "May 2025",
+  //     location: "Jakarta",
+  //     description: "Keputusan Menteri Hukum Republik Indonesia Nomor AHU-0002887.AH.01.07.TAHUN 2025 Tentang Pengesahan Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA: Menetapkan memberikan pengesahan Perkumpulan: MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA Berkedudukan di JAKARTA SELATAN, sesuai salinan Akta Nomor 03 Tanggal 10 Maret 2025 yang dibuat oleh MUHAMMAD SYARIF UMAR S.H., M.KN.,, yang berkedudukan di KOTA DEPOK",
+  //     highlightedText: ""
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Akta Pendirian Perkumpulan MERCEDES BENZ WDUA NOL DUA CLUB INDONESIA",
+  //     date: "March 2025",
+  //     location: "Jakarta",
+  //     description: "Akta Pendirian Perkumpulan disusun untuk proses pengajuan Badan Hukum Perkumpulan",
+  //     highlightedText: ""
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia",
+  //     date: "September 2023",
+  //     location: "Sentul, Bogor Jawa Barat",
+  //     description: "Penyerahan Sertifikat Pengurus Pusat MBW202CI dari Mercedes-Benz Club Indonesia yang diselenggarakan bertepatan pada acara Autospeed Festival di Sentul Internasional Circuit pada 2 September 2023 sekaligus Pemecahan Rekor Muri 1000 Mercedes Benz berkumpul dan berparade.",
+  //     highlightedText: ""
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Revisi Anggaran Dasar Mercedes-Benz Club Indonesia yang Mengakomodasi Keberadaan Pengurus Pusat Club Variant",
+  //     date: "June 2023",
+  //     location: "Bogor Jawa Barat",
+  //     description: "Pada Munas X Mercedes-Benz Club Indonesia yang berlangsung di Bogor 24 Juni 2023 telah dilakukan revisi Anggaran Dasar yang mengakomodir keberadaan Pengurus Pusat Club Variant seperti MBW202CI.",
+  //     highlightedText: ""
+  //   },
+  //   {
+  //     id: 5,
+  //     title: "MBW202CI District 04.2 Solo Berdiri",
+  //     date: "February 2016",
+  //     location: "Solo Jawa Tengah",
+  //     description: "Pengukuhan pendirian MBW202CI District 04.2 Solo.",
+  //     highlightedText: ""
+  //   }
+  // ];
 
   // Map API data to milestones format, or use static data as fallback
   const apiMilestones = data?.content?.result?.map((item) => ({
@@ -76,12 +78,12 @@ export default function HomeHistory() {
     title: item.title || item.name,
     date: item.date,
     location: "", // Not provided in API
-    description: item.shortdesc || item.name,
+    description: item.shortdesc || item.text,
     highlightedText: "",
   })) || [];
 
   // Use API data if available, otherwise use static data
-  const displayMilestones = apiMilestones.length > 0 ? apiMilestones : milestones;
+  const displayMilestones = apiMilestones.length > 0 ? apiMilestones : [];
 
   const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);

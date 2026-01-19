@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
 import { CHAPTER_ID, CATEGORIES } from "@/lib/constants/api";
+import { text } from "stream/consumers";
 
 interface Event {
   id: number;
@@ -15,84 +16,9 @@ interface Event {
   slug: string;
 }
 
-const EVENTS: Event[] = [
-  {
-    id: 1,
-    title: "Jambore Nasional XX di Sumatera Bandung",
-    date: "15 Januari 2026",
-    location: "Bandung, Jawa Barat",
-    image: "/hero-1.jpg",
-    slug: "jambore-nasional-xx-bandung",
-  },
-  {
-    id: 2,
-    title: "Coaching Clinic by Thomas Narayana W202 JT-074",
-    date: "22 Januari 2026",
-    location: "Jakarta",
-    image: "/hero-2.jpg",
-    slug: "coaching-clinic-thomas-narayana",
-  },
-  {
-    id: 3,
-    title: "Super Street Star Night Race Series",
-    date: "5 Februari 2026",
-    location: "Sentul Circuit",
-    image: "/hero-3.jpg",
-    slug: "super-street-star-night-race",
-  },
-  {
-    id: 4,
-    title: "Gathering Regional Jawa Timur",
-    date: "12 Februari 2026",
-    location: "Surabaya, Jawa Timur",
-    image: "/Pic-1.jpg",
-    slug: "gathering-regional-jawa-timur",
-  },
-  {
-    id: 5,
-    title: "Workshop Perawatan Mesin W202",
-    date: "20 Februari 2026",
-    location: "Jakarta Selatan",
-    image: "/hero-1.jpg",
-    slug: "workshop-perawatan-mesin-w202",
-  },
-  {
-    id: 6,
-    title: "Touring Pantai Selatan Jawa",
-    date: "1 Maret 2026",
-    location: "Yogyakarta - Pantai Selatan",
-    image: "/hero-2.jpg",
-    slug: "touring-pantai-selatan-jawa",
-  },
-  {
-    id: 7,
-    title: "Meet & Greet with Mercedes-Benz Indonesia",
-    date: "10 Maret 2026",
-    location: "Mercedes-Benz Jakarta",
-    image: "/hero-3.jpg",
-    slug: "meet-greet-mercedes-benz-indonesia",
-  },
-  {
-    id: 8,
-    title: "Bakti Sosial Region Semarang",
-    date: "15 Maret 2026",
-    location: "Semarang, Jawa Tengah",
-    image: "/Pic-1.jpg",
-    slug: "bakti-sosial-region-semarang",
-  },
-  {
-    id: 9,
-    title: "Anniversary MBW202CI ke-19",
-    date: "7 Juli 2026",
-    location: "Jakarta",
-    image: "/hero-1.jpg",
-    slug: "anniversary-mbw202ci-19",
-  },
-];
-
 export default function HomeEvent() {
   const [showAll, setShowAll] = useState(false);
-  
+
   // Fetch events from API
   const { data, isLoading, error } = useArticleIndexWebsite({
     chapter: CHAPTER_ID,
@@ -104,16 +30,23 @@ export default function HomeEvent() {
   });
 
   // Map API data or use static data as fallback
-  const apiEvents = data?.content?.result?.map((item) => ({
-    id: parseInt(item.id),
-    title: item.title || item.name,
-    date: item.date,
-    location: "", // Not provided in API
-    image: item.image || "/hero-1.jpg",
-    slug: item.id,
-  })) || [];
+  const apiEvents =
+    data?.content?.result?.map((item) => {
+      // Check if image URL is valid (has filename after base URL)
+      const hasValidImage = item.image && !item.image.endsWith('/') && item.image.includes('.');
+      
+      return {
+        id: parseInt(item.id),
+        title: item.title || item.name,
+        date: item.date,
+        text: item.text?.replace(/<[^>]*>/g, '').replace(/[\n\t]/g, ' ').trim() || "",
+        location: "", // Not provided in API
+        image: hasValidImage ? item.image : "/Pic-2.jpg",
+        slug: item.id,
+      };
+    }) || [];
 
-  const events = apiEvents.length > 0 ? apiEvents : EVENTS;
+  const events = apiEvents.length > 0 ? apiEvents : [];
   const displayedEvents = showAll ? events : events.slice(0, 6);
 
   return (
@@ -140,70 +73,82 @@ export default function HomeEvent() {
         {/* Events Grid */}
         <div className="bg-gray-100 rounded-lg shadow-md p-6 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayedEvents.map((event) => (
-            <Link
-              key={event.id}
-              href={`/event/${event.slug}`}
-              className="group bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full"
-            >
-              <div className="relative h-48 overflow-hidden">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  className="object-cover group-hover:scale-110 transition-transform duration-300"
-                />
-              </div>
+            {displayedEvents.map((event) => (
+              <Link
+                key={event.id}
+                href={`/event/${event.slug}`}
+                className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full"
+              >
+                <div className="aspect-video overflow-hidden">
+                  <Image
+                    src={event.image||"/Pic-2.jpg"}
+                    alt={event.title}
+                    fill
+                    className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                  />
+                </div>
 
-              <div className="p-5">
-                <h3 className="font-heading text-brand-primary text-lg mb-3 line-clamp-2 group-hover:text-brand-accent transition-colors">
-                  {event.title}
-                </h3>
-
-                <div className="space-y-2 text-sm text-brand-gray">
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <span>{event.date}</span>
+                <div className="p-4 flex flex-col flex-grow">
+                  <div className="mb-2">
+                    <h4 className="font-sans font-semibold text-brand-primary text-sm line-clamp-2 leading-tight">
+                      {event.title}
+                    </h4>
                   </div>
+                  <div className="flex-grow">
+                      <p className="text-sm text-gray-600 mb-1">
+                        {event.date} • {event.text}
+                      </p>
+                      <p className="text-sm mb-1 line-clamp-2">
+                        Event tahunan Mercedes Benz Club Indonesia
+                      </p>
+                      {/* <div className="flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <span>{event.date}</span>
+                      </div> */}
+                      {/* <div className="mb-2">
+                        <h4 className="font-sans font-semibold text-mercedes-blue text-sm line-clamp-2 leading-tight">
+                          Jambore Nasional XX di Sumarecon Bandung
+                        </h4>
+                      </div> */}
 
-                  <div className="flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    <span>{event.location}</span>
+                      {/* <div className="flex items-center gap-2">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        <span>{event.location}</span>
+                      </div> */}
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
           </div>
         </div>
 
