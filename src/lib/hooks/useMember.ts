@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchMembers, MemberPayload } from "@/lib/api/client";
 
-export const useMember = (payload: Omit<MemberPayload, "offset">) => {
+export const useMember = (payload: Omit<MemberPayload, "offset">, enabled = true) => {
   return useInfiniteQuery({
     queryKey: ["members", payload.chapter, payload.limit],
     queryFn: ({ pageParam = 0 }) =>
@@ -20,5 +20,6 @@ export const useMember = (payload: Omit<MemberPayload, "offset">) => {
       }
       return undefined;
     },
+    enabled,
   });
 };

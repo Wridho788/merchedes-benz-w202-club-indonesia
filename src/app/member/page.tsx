@@ -79,8 +79,9 @@ export default function MemberPage() {
   const allMembers = membersData?.pages.flatMap((page) => page.content.result) || []
   const totalRecord = membersData?.pages[0]?.content.record || 0
 
-  // Filter featured members
+  // Separate featured and regular members
   const featuredMembers = allMembers.filter((member) => member.featured === "1")
+  const regularMembers = allMembers.filter((member) => member.featured === "0")
 
   return (
     <div className="page-wrapper">
@@ -240,11 +241,11 @@ export default function MemberPage() {
             </div>
           </div>
 
-          {/* Featured Members Directory */}
+          {/* Members Directory */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             <div className="flex flex-wrap justify-between items-center mb-6">
               <h3 className="font-sans font-semibold text-xl text-brand-primary">
-                Direktori Featured Member
+                Direktori Member
               </h3>
               <div className="flex items-center space-x-4 bg-gray-50 p-3 rounded-lg mt-3 sm:mt-0">
                 <svg
@@ -282,62 +283,165 @@ export default function MemberPage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {featuredMembers.map((member) => (
-                    <div
-                      key={member.code}
-                      className="border border-gray-200 rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-center p-4 border-b border-gray-200">
-                        <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border border-gray-200 bg-gray-100 flex items-center justify-center">
-                          {member.image ? (
-                            <Image
-                              src={member.image}
-                              alt={member.name}
-                              width={64}
-                              height={64}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
+                {/* Featured Members Section */}
+                {featuredMembers.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4 flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-yellow-500"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                      Featured Members
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {featuredMembers.map((member) => (
+                        <div
+                          key={member.code}
+                          className="border-2 border-yellow-400 rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow relative"
+                        >
+                          <div className="absolute top-2 right-2 bg-yellow-400 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="32"
-                              height="32"
+                              width="12"
+                              height="12"
                               viewBox="0 0 24 24"
-                              fill="none"
+                              fill="currentColor"
                               stroke="currentColor"
                               strokeWidth="2"
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              className="text-gray-400"
                             >
-                              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                              <circle cx="12" cy="7" r="4"></circle>
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                             </svg>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-sans font-medium text-brand-primary">
-                            {member.name}
-                          </h4>
-                          <div className="flex flex-wrap gap-1 items-center">
-                            <span className="text-xs bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">
-                              {member.chapter}
-                            </span>
+                            Featured
+                          </div>
+                          <div className="flex items-center p-4 border-b border-gray-200">
+                            <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-yellow-400 bg-gray-100 flex items-center justify-center">
+                              {member.image ? (
+                                <Image
+                                  src={member.image}
+                                  alt={member.name}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="text-gray-400"
+                                >
+                                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-sans font-medium text-brand-primary">
+                                {member.name}
+                              </h4>
+                              <div className="flex flex-wrap gap-1 items-center">
+                                <span className="text-xs bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">
+                                  {member.chapter}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 flex-grow">
+                            {member.vehicle && (
+                              <p className="text-sm font-medium">{member.vehicle}</p>
+                            )}
+                            <p className="text-xs text-gray-600 mt-1">
+                              Member sejak: {member.joined}
+                            </p>
                           </div>
                         </div>
-                      </div>
-                      <div className="p-4 bg-gray-50 flex-grow">
-                        {member.vehicle && (
-                          <p className="text-sm font-medium">{member.vehicle}</p>
-                        )}
-                        <p className="text-xs text-gray-600 mt-1">
-                          Member sejak: {member.joined}
-                        </p>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+
+                {/* All Members Section */}
+                {regularMembers.length > 0 && (
+                  <div>
+                    <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4">
+                      Semua Member
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {regularMembers.map((member) => (
+                        <div
+                          key={member.code}
+                          className="border border-gray-200 rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center p-4 border-b border-gray-200">
+                            <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border border-gray-200 bg-gray-100 flex items-center justify-center">
+                              {member.image ? (
+                                <Image
+                                  src={member.image}
+                                  alt={member.name}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="text-gray-400"
+                                >
+                                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-sans font-medium text-brand-primary">
+                                {member.name}
+                              </h4>
+                              <div className="flex flex-wrap gap-1 items-center">
+                                <span className="text-xs bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">
+                                  {member.chapter}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 flex-grow">
+                            {member.vehicle && (
+                              <p className="text-sm font-medium">{member.vehicle}</p>
+                            )}
+                            <p className="text-xs text-gray-600 mt-1">
+                              Member sejak: {member.joined}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Loading indicator for infinite scroll */}
                 {isFetchingNextPage && (
