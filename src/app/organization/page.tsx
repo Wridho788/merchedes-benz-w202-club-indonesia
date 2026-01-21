@@ -330,11 +330,11 @@ export default function OrganizationPage() {
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                       </svg>
                       <h4 className="font-sans font-semibold text-brand-primary">
-                        {region.name}
+                        {region.desc}
                       </h4>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
-                      Koordinator Regional: {region.chief}
+                      Koordinator Regional: {region.type}
                     </p>
                     <div className="flex items-start mb-2">
                       <svg
@@ -362,7 +362,7 @@ export default function OrganizationPage() {
                         <path d="M8 14h.01"></path>
                       </svg>
                       <p className="text-sm">
-                        Wilayah: {region.city}
+                        Wilayah: {region.address}
                       </p>
                     </div>
                     <p className="text-sm text-gray-600">Member: {region.members} orang</p>
