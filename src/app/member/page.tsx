@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import { useMember } from '@/lib/hooks/useMember'
+import { useChapterById } from '@/lib/hooks/useChapterById'
+import { CHAPTER_ID } from '@/lib/constants/api'
 
 const BENEFITS = [
   {
@@ -30,38 +33,54 @@ const BENEFITS = [
   }
 ]
 
-const FEATURED_MEMBERS = [
-  {
-    id: 1,
-    name: "Richard Pardede",
-    region: "Region 01 Jakarta",
-    car: "W202 C180 Esprit1994",
-    memberSince: "2007",
-    image: "/Pic-1.jpg",
-    youtubeUrl: "https://youtu.be/DpC6ogOXdag?si=qA2JFk5NXUcDZ6fn"
-  },
-  {
-    id: 2,
-    name: "Gomos Silitonga",
-    region: "Region 01 Jakarta",
-    car: "W202 Brabus B2 Full Modification",
-    memberSince: "2009",
-    image: "/Pic-2.jpg",
-    youtubeUrl: "https://youtu.be/gG_DMCrKFVU?si=LgfryxllesU7BeIk"
-  },
-  {
-    id: 3,
-    name: "Hamzah",
-    region: "Region 03 Surabaya",
-    car: "W202 C200 Full Modification",
-    memberSince: "2010",
-    image: "/Pic-3.jpg",
-    youtubeUrl: "https://youtu.be/oToC-E3iLuo?si=4FsOZS7GO9VBIBRG"
-  }
-]
-
 export default function MemberPage() {
-  const [selectedRegion, setSelectedRegion] = useState("all")
+  const [selectedRegion, setSelectedRegion] = useState("")
+  const observerTarget = useRef<HTMLDivElement>(null)
+
+  // Fetch chapter data
+  const { data: chapterData } = useChapterById(CHAPTER_ID)
+
+  // Fetch members data with infinite scroll
+  const {
+    data: membersData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isLoadingMembers,
+  } = useMember({
+    chapter: selectedRegion,
+    limit: 50,
+  })
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  // Get all members from all pages
+  const allMembers = membersData?.pages.flatMap((page) => page.content.result) || []
+  const totalRecord = membersData?.pages[0]?.content.record || 0
+
+  // Filter featured members
+  const featuredMembers = allMembers.filter((member) => member.featured === "1")
 
   return (
     <div className="page-wrapper">
@@ -247,79 +266,98 @@ export default function MemberPage() {
                   onChange={(e) => setSelectedRegion(e.target.value)}
                   className="w-[180px] border-none bg-transparent focus:ring-0 text-sm"
                 >
-                  <option value="all">Semua Region</option>
-                  <option value="jakarta">Region 01 Jakarta</option>
-                  <option value="bandung">Region 02 Bandung</option>
-                  <option value="surabaya">Region 03 Surabaya</option>
+                  <option value="">Semua Region</option>
+                  {chapterData?.content.child?.map((chapter) => (
+                    <option key={chapter.id} value={chapter.id}>
+                      {chapter.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {FEATURED_MEMBERS.map((member) => (
-                <div
-                  key={member.id}
-                  className="border border-gray-200 rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center p-4 border-b border-gray-200">
-                    <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border border-gray-200">
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-sans font-medium text-brand-primary">
-                        {member.name}
-                      </h4>
-                      <div className="flex flex-wrap gap-1 items-center">
-                        <span className="text-xs bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">
-                          {member.region}
-                        </span>
-                      </div>
-                      {member.youtubeUrl && (
-                        <div className="flex space-x-2 mt-2">
-                          <a
-                            href={member.youtubeUrl}
-                            className="text-sm text-brand-primary hover:text-brand-accent"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+            {isLoadingMembers ? (
+              <div className="text-center py-12">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-brand-primary border-r-transparent"></div>
+                <p className="mt-4 text-gray-600">Memuat data member...</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {featuredMembers.map((member) => (
+                    <div
+                      key={member.code}
+                      className="border border-gray-200 rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center p-4 border-b border-gray-200">
+                        <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border border-gray-200 bg-gray-100 flex items-center justify-center">
+                          {member.image ? (
+                            <Image
+                              src={member.image}
+                              alt={member.name}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
+                              width="32"
+                              height="32"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2"
                               strokeLinecap="round"
                               strokeLinejoin="round"
+                              className="text-gray-400"
                             >
-                              <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
-                              <path d="m10 15 5-3-5-3z"></path>
+                              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                              <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                          </a>
+                          )}
                         </div>
-                      )}
+                        <div className="flex-1">
+                          <h4 className="font-sans font-medium text-brand-primary">
+                            {member.name}
+                          </h4>
+                          <div className="flex flex-wrap gap-1 items-center">
+                            <span className="text-xs bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">
+                              {member.chapter}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 bg-gray-50 flex-grow">
+                        {member.vehicle && (
+                          <p className="text-sm font-medium">{member.vehicle}</p>
+                        )}
+                        <p className="text-xs text-gray-600 mt-1">
+                          Member sejak: {member.joined}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4 bg-gray-50 flex-grow">
-                    <p className="text-sm font-medium">{member.car}</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Member sejak: {member.memberSince}
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="text-center mt-8">
-              <p className="text-gray-600 text-sm">
-                Menampilkan {FEATURED_MEMBERS.length} featured member
-              </p>
-            </div>
+
+                {/* Loading indicator for infinite scroll */}
+                {isFetchingNextPage && (
+                  <div className="text-center py-8">
+                    <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-brand-primary border-r-transparent"></div>
+                    <p className="mt-2 text-sm text-gray-600">Memuat lebih banyak...</p>
+                  </div>
+                )}
+
+                {/* Observer target for infinite scroll */}
+                <div ref={observerTarget} className="h-4" />
+
+                <div className="text-center mt-8">
+                  <p className="text-gray-600 text-sm">
+                    Menampilkan {allMembers.length} dari {totalRecord} member
+                    {featuredMembers.length > 0 && ` (${featuredMembers.length} featured)`}
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

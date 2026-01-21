@@ -55,8 +55,38 @@ export interface Chapter {
   discount: number;
   chief: string;
   vice: string;
+  vice2?: string;
+  treasurer: string;
+  treasure2?: string;
+  billing_contact: string;
+  humas_pic?: string;
+  creative_pic?: string;
+  legal_pic?: string;
+  it_pic?: string;
+  socialmedia_pic?: string;
+  sponshorship_pic?: string;
+  members: number;
+  child?: ChapterChild[];
+}
+
+export interface ChapterChild {
+  id: string;
+  code: string;
+  name: string;
+  desc: string;
+  instagram: string;
+  image: string;
+  city: string;
+  email: string;
+  phone: string;
+  address: string;
+  chief: string;
+  vice: string;
   treasurer: string;
   billing_contact: string;
+  order: string;
+  type: string;
+  members: number;
 }
 
 export interface SliderResponse {
@@ -74,7 +104,10 @@ export interface ArticleResponse {
 }
 
 export interface ChapterResponse {
-  content: Chapter;
+  content: {
+    result: Chapter;
+    child?: ChapterChild[];
+  };
 }
 
 export interface ArticleIndexPayload {
@@ -84,6 +117,29 @@ export interface ArticleIndexPayload {
   offset: number;
   orderby: string;
   order: string;
+}
+
+export interface Member {
+  code: string;
+  chapter: string;
+  name: string;
+  joined: string;
+  vehicle: string;
+  image: string | null;
+  featured: string;
+}
+
+export interface MemberResponse {
+  content: {
+    record: number;
+    result: Member[];
+  };
+}
+
+export interface MemberPayload {
+  chapter: string | number;
+  limit: number;
+  offset: number;
 }
 
 // API Functions
@@ -116,6 +172,16 @@ export const fetchChapterById = async (
 ): Promise<ChapterResponse> => {
   const response = await apiClient.get<ChapterResponse>(
     `${API_ENDPOINTS.CHAPTER_GET_BY_ID}/${chapterId}`
+  );
+  return response.data;
+};
+
+export const fetchMembers = async (
+  payload: MemberPayload
+): Promise<MemberResponse> => {
+  const response = await apiClient.post<MemberResponse>(
+    API_ENDPOINTS.MEMBER,
+    payload
   );
   return response.data;
 };

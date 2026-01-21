@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
   SLIDER_WEBSITE: "/slider/index_website/13",
   ARTICLE_INDEX_WEBSITE: "/article/index_website",
   CHAPTER_GET_BY_ID: "/chapter/get_by_id",
+  MEMBER: '/customer'
 } as const;
 
 // Chapter ID constant

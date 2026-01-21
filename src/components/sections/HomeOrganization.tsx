@@ -31,8 +31,8 @@ export default function HomeOrganization() {
     order: "asc",
   });
 
-  const presidentMessage = chapterData?.content?.desc || `Mercedes-Benz W202 Club Indonesia adalah Club Otomotif yang mempunyai historia yang panjang. Kami berkomitmen untuk membawa Mercedes-Benz W202 Club Indonesia Bersama Melaju Lebih Jauh dan mempersatukan seluruh Member dari Region dan District untuk memperkuat solidaritas antar anggota, dan membawa komunitas menuju era yang lebih modern, dinamis, berdaya guna, dan dikenal secara Nasional maupun Internasional.`;
-  const presidentName = chapterData?.content?.chief || "Hamzah Lutfi Abdat";
+  const presidentMessage = chapterData?.content?.result?.desc || `Mercedes-Benz W202 Club Indonesia adalah Club Otomotif yang mempunyai historia yang panjang. Kami berkomitmen untuk membawa Mercedes-Benz W202 Club Indonesia Bersama Melaju Lebih Jauh dan mempersatukan seluruh Member dari Region dan District untuk memperkuat solidaritas antar anggota, dan membawa komunitas menuju era yang lebih modern, dinamis, berdaya guna, dan dikenal secara Nasional maupun Internasional.`;
+  const presidentName = chapterData?.content?.result?.chief || "Hamzah Lutfi Abdat";
 
   const activities = activitiesData?.content?.result || [];
 
