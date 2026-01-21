@@ -1,6 +1,8 @@
 "use client";
 
 import Image from 'next/image'
+import { useChapterById } from '@/lib/hooks/useChapterById'
+import { CHAPTER_ID } from '@/lib/constants/api'
 
 const BOARD_MEMBERS = [
   {
@@ -62,73 +64,10 @@ const DIVISIONS = [
   }
 ]
 
-const REGIONS = [
-  {
-    id: 1,
-    name: "Region 01 Jakarta",
-    coordinator: "Chief",
-    area: "Jabodetabek, Banten, Lampung",
-    members: 594
-  },
-  {
-    id: 2,
-    name: "Region 02 Bandung",
-    coordinator: "Chief",
-    area: "Bandung Raya, Cirebon, Tasikmalaya, Sukabumi, Garut, Cianjur",
-    members: 172
-  },
-  {
-    id: 3,
-    name: "Region 03 Surabaya",
-    coordinator: "Chief",
-    area: "Surabaya, Sidoarjo, Gresik, Mojokerto",
-    members: 120
-  },
-  {
-    id: 4,
-    name: "District 03.1 Malang",
-    coordinator: "Deputy",
-    area: "Malang, Batu, Blitar",
-    members: 24
-  },
-  {
-    id: 5,
-    name: "Region 04 Semarang",
-    coordinator: "Chief",
-    area: "Semarang, Demak, Kendal",
-    members: 50
-  },
-  {
-    id: 6,
-    name: "District 04.1 Pekalongan",
-    coordinator: "Deputy",
-    area: "Pekalongan, Batang",
-    members: 20
-  },
-  {
-    id: 7,
-    name: "District 04.2 Solo",
-    coordinator: "Deputy",
-    area: "Solo, Sukoharjo, Karanganyar, Klaten, Boyolali",
-    members: 40
-  },
-  {
-    id: 8,
-    name: "Region 05 Medan",
-    coordinator: "Chief",
-    area: "Medan, Deli Serdang, Binjai",
-    members: 30
-  },
-  {
-    id: 9,
-    name: "Region 06 Yogyakarta",
-    coordinator: "Chief",
-    area: "Yogyakarta, Sleman, Bantul, Kulon Progo",
-    members: 104
-  }
-]
-
 export default function OrganizationPage() {
+  const { data: chapterData, isLoading: isLoadingChapter } = useChapterById(CHAPTER_ID);
+  
+  const regions = chapterData?.content?.child || [];
   return (
     <div className="page-wrapper">
       <section className="py-20 bg-white">
@@ -364,67 +303,73 @@ export default function OrganizationPage() {
             <h3 className="font-sans font-semibold text-xl text-brand-primary mb-6">
               Struktur Regional
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {REGIONS.map((region) => (
-                <div key={region.id} className="bg-gray-50 rounded-lg p-6 shadow-md">
-                  <div className="flex items-center mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-brand-primary mr-3"
-                    >
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    <h4 className="font-sans font-semibold text-brand-primary">
-                      {region.name}
-                    </h4>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Koordinator Regional: {region.coordinator}
-                  </p>
-                  <div className="flex items-start mb-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-brand-accent mt-1 mr-2 flex-shrink-0"
-                    >
-                      <rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect>
-                      <path d="M9 22v-4h6v4"></path>
-                      <path d="M8 6h.01"></path>
-                      <path d="M16 6h.01"></path>
-                      <path d="M12 6h.01"></path>
-                      <path d="M12 10h.01"></path>
-                      <path d="M12 14h.01"></path>
-                      <path d="M16 10h.01"></path>
-                      <path d="M16 14h.01"></path>
-                      <path d="M8 10h.01"></path>
-                      <path d="M8 14h.01"></path>
-                    </svg>
-                    <p className="text-sm">
-                      Wilayah: {region.area}
+            {isLoadingChapter ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600">Memuat data regional...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {regions.map((region) => (
+                  <div key={region.id} className="bg-gray-50 rounded-lg p-6 shadow-md">
+                    <div className="flex items-center mb-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-brand-primary mr-3"
+                      >
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
+                      <h4 className="font-sans font-semibold text-brand-primary">
+                        {region.name}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Koordinator Regional: {region.chief}
                     </p>
+                    <div className="flex items-start mb-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-brand-accent mt-1 mr-2 flex-shrink-0"
+                      >
+                        <rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect>
+                        <path d="M9 22v-4h6v4"></path>
+                        <path d="M8 6h.01"></path>
+                        <path d="M16 6h.01"></path>
+                        <path d="M12 6h.01"></path>
+                        <path d="M12 10h.01"></path>
+                        <path d="M12 14h.01"></path>
+                        <path d="M16 10h.01"></path>
+                        <path d="M16 14h.01"></path>
+                        <path d="M8 10h.01"></path>
+                        <path d="M8 14h.01"></path>
+                      </svg>
+                      <p className="text-sm">
+                        Wilayah: {region.city}
+                      </p>
+                    </div>
+                    <p className="text-sm text-gray-600">Member: {region.members} orang</p>
                   </div>
-                  <p className="text-sm text-gray-600">Member: {region.members} orang</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>

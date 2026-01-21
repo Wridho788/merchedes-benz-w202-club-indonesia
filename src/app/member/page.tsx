@@ -270,7 +270,7 @@ export default function MemberPage() {
                   <option value="">Semua Region</option>
                   {chapterData?.content.child?.map((chapter) => (
                     <option key={chapter.id} value={chapter.id}>
-                      {chapter.name}
+                      {chapter.desc}
                     </option>
                   ))}
                 </select>
