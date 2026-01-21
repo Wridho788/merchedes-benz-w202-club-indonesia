@@ -80,6 +80,7 @@ export default function MemberPage() {
   const totalRecord = membersData?.pages[0]?.content.record || 0
 
   // Separate featured and regular members
+  const featuredMembers = allMembers.filter((member) => member.featured === "1")
   const regularMembers = allMembers.filter((member) => member.featured === "0")
 
   return (
@@ -282,7 +283,100 @@ export default function MemberPage() {
               </div>
             ) : (
               <>
-
+{/* Featured Members Section */}
+                {featuredMembers.length > 0 && (
+                  <div className="mb-8">
+                    <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4 flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-yellow-500"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                      Featured Members
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {featuredMembers.map((member) => (
+                        <div
+                          key={member.code}
+                          className="border-2 border-yellow-400 rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-shadow relative"
+                        >
+                          <div className="absolute top-2 right-2 bg-yellow-400 text-white px-2 py-1 rounded-md text-xs font-semibold flex items-center gap-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            Featured
+                          </div>
+                          <div className="flex items-center p-4 border-b border-gray-200">
+                            <div className="w-16 h-16 rounded-full overflow-hidden mr-4 border-2 border-yellow-400 bg-gray-100 flex items-center justify-center">
+                              {member.image ? (
+                                <Image
+                                  src={member.image}
+                                  alt={member.name}
+                                  width={64}
+                                  height={64}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="32"
+                                  height="32"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="text-gray-400"
+                                >
+                                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                  <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-sans font-medium text-brand-primary">
+                                {member.name}
+                              </h4>
+                              <div className="flex flex-wrap gap-1 items-center">
+                                <span className="text-xs bg-gray-50 px-2 py-0.5 rounded-md text-gray-600">
+                                  {member.chapter}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 flex-grow">
+                            {member.vehicle && (
+                              <p className="text-sm font-medium">{member.vehicle}</p>
+                            )}
+                            <p className="text-xs text-gray-600 mt-1">
+                              Member sejak: {member.joined}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {/* All Members Section */}
                 {regularMembers.length > 0 && (
                   <div>
@@ -362,6 +456,7 @@ export default function MemberPage() {
                 <div className="text-center mt-8">
                   <p className="text-gray-600 text-sm">
                     Menampilkan {allMembers.length} dari {totalRecord} member
+                    {featuredMembers.length > 0 && ` (${featuredMembers.length} featured)`}
                   </p>
                 </div>
               </>
