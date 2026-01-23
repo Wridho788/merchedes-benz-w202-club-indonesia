@@ -1,16 +1,28 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'All About W202',
-  description: 'Informasi lengkap tentang Mercedes-Benz W202 - Sejarah, varian, dan tips perawatan untuk para penggemar dan pemilik',
-  keywords: ['Mercedes-Benz W202', 'W202 History', 'W202 Maintenance', 'C-Class W202', 'W202 Variants'],
+  title: 'All About W202 | Sejarah, Varian & Tips Perawatan Mercedes-Benz W202',
+  description: 'Informasi lengkap tentang Mercedes-Benz W202 - Sejarah C-Class pertama (1993-2000), varian mesin dari C180 hingga C43 AMG, dan tips perawatan untuk para penggemar dan pemilik.',
+  keywords: ['Mercedes-Benz W202', 'W202 History', 'W202 Maintenance', 'C-Class W202', 'W202 Variants', 'C36 AMG', 'C43 AMG', 'Tips Perawatan W202'],
   openGraph: {
-    title: 'Mercedes Benz W202 Club Indonesia | All About W202',
-    description: 'Informasi lengkap tentang Mercedes-Benz W202 untuk para penggemar dan pemilik',
-    url: 'https://mbw202club.id/about',
+    title: 'All About W202 | Sejarah, Varian & Tips Perawatan Mercedes-Benz W202',
+    description: 'Informasi lengkap tentang Mercedes-Benz W202 - Sejarah, varian mesin, dan tips perawatan untuk para penggemar dan pemilik',
+    url: 'https://mbw202clubindonesia.vercel.app/about',
     siteName: 'Mercedes Benz W202 Club Indonesia',
+    images: [{
+      url: '/hero-1.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'All About Mercedes-Benz W202',
+    }],
     locale: 'id_ID',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'All About W202 | Sejarah, Varian & Tips Perawatan Mercedes-Benz W202',
+    description: 'Informasi lengkap tentang Mercedes-Benz W202 untuk para penggemar dan pemilik',
+    images: ['/hero-1.jpg'],
   },
 }
 

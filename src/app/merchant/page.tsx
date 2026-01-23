@@ -1,3 +1,31 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
+  description: 'Daftar merchant dan sponsor resmi W202 Club of Indonesia. Temukan bengkel, towing, detailing, dan partner terpercaya untuk Mercedes-Benz W202 Anda.',
+  keywords: ['Merchant MBW202CI', 'Sponsor W202 Club', 'Bengkel Mercedes W202', 'Partner MBW202CI', 'Towing Mercedes', 'Detailing Mercedes Indonesia'],
+  openGraph: {
+    title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
+    description: 'Daftar merchant dan sponsor resmi W202 Club of Indonesia. Temukan bengkel, towing, detailing, dan partner terpercaya.',
+    url: 'https://mbw202club.id/merchant',
+    siteName: 'Mercedes Benz W202 Club Indonesia',
+    images: [{
+      url: '/hero-1.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'Merchant & Sponsor Mercedes Benz W202 Club Indonesia',
+    }],
+    locale: 'id_ID',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
+    description: 'Daftar merchant dan sponsor resmi W202 Club of Indonesia',
+    images: ['/hero-1.jpg'],
+  },
+}
+
 const MERCHANTS = [
   {
     id: 1,

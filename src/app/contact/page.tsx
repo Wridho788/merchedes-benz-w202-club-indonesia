@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Mercedes Benz W202 Club Indonesia | Contact',
     description: 'Hubungi Mercedes-Benz W202 Club Indonesia',
-    url: 'https://mbw202club.id/contact',
+    url: 'https://mbw202clubindonesia.vercel.app/contact',
     siteName: 'Mercedes Benz W202 Club Indonesia',
     locale: 'id_ID',
     type: 'website',

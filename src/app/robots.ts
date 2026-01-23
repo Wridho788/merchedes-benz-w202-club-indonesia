@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: [],
     },
-    sitemap: 'https://mbw202club.id/sitemap.xml',
+    sitemap: 'https://mbw202clubindonesia.vercel.app/sitemap.xml',
   }
 }

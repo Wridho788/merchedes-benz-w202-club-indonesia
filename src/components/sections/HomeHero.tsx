@@ -5,45 +5,96 @@ import Image from "next/image";
 import clsx from "clsx";
 import { useSliderWebsite } from "@/lib/hooks/useSliderWebsite";
 
-const HERO_SLIDES = [
+// Fallback slides ketika API tidak tersedia
+const FALLBACK_SLIDES = [
   {
     id: 1,
     image: "/hero-1.jpg",
     alt: "Mercedes Benz W202 Gathering",
+    url: "",
   },
   {
     id: 2,
     image: "/hero-2.jpg",
     alt: "Mercedes Benz W202 Community",
+    url: "",
   },
   {
     id: 3,
     image: "/hero-3.jpg",
     alt: "Mercedes Benz W202 Club Event",
+    url: "",
   },
 ];
 
 export default function HomeHero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [imageError, setImageError] = useState<Record<number, boolean>>({});
+  const [imagesLoaded, setImagesLoaded] = useState(false);
   const { data, isLoading, error } = useSliderWebsite("10", "0");
 
-  // Use API data if available, otherwise fallback to static data
-  const slides = data?.content?.result?.length
-    ? data.content.result.map((item) => ({
-        id: parseInt(item.id),
-        image: item.image,
-        alt: item.name,
-        url: item.url,
-      }))
-    : HERO_SLIDES;
+  // Use API data if available, fallback to static data only on error
+  const slides = error
+    ? FALLBACK_SLIDES
+    : data?.content?.result?.length
+      ? data.content.result.map((item) => ({
+          id: parseInt(item.id),
+          image: item.image,
+          alt: item.name,
+          url: item.url,
+        }))
+      : [];
+
+  // Track image loading
+  const [loadedCount, setLoadedCount] = useState(0);
+
+  const handleImageLoad = () => {
+    setLoadedCount((prev) => prev + 1);
+  };
+
+  // Set imagesLoaded when all images are loaded
+  useEffect(() => {
+    if (slides.length > 0 && loadedCount >= slides.length) {
+      setImagesLoaded(true);
+    }
+  }, [loadedCount, slides.length]);
+
+  // Reset loaded state when slides change
+  useEffect(() => {
+    setLoadedCount(0);
+    setImagesLoaded(false);
+  }, [data, error]);
 
   useEffect(() => {
+    // Jangan jalankan interval jika tidak ada slides
+    if (slides.length <= 1) return;
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000); // Auto slide every 5 seconds
 
     return () => clearInterval(interval);
   }, [slides.length]);
+
+  // Reset currentSlide jika melebihi jumlah slides
+  useEffect(() => {
+    if (currentSlide >= slides.length && slides.length > 0) {
+      setCurrentSlide(0);
+    }
+  }, [currentSlide, slides.length]);
+
+  // Handle image load error - gunakan fallback
+  const handleImageError = (slideId: number) => {
+    setImageError((prev) => ({ ...prev, [slideId]: true }));
+  };
+
+  // Dapatkan image source dengan fallback
+  const getImageSrc = (slide: (typeof slides)[0], index: number) => {
+    if (imageError[slide.id] && FALLBACK_SLIDES[index]) {
+      return FALLBACK_SLIDES[index].image;
+    }
+    return slide.image;
+  };
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -61,6 +112,13 @@ export default function HomeHero() {
 
   return (
     <section className="relative h-[700px] md:h-[600px] lg:h-[700px] overflow-hidden">
+      {/* Loading State - tampil saat loading API atau images belum selesai load */}
+      {(isLoading || (slides.length > 0 && !imagesLoaded)) && (
+        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-40">
+          <div className="animate-pulse text-white">Loading...</div>
+        </div>
+      )}
+
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
@@ -71,12 +129,15 @@ export default function HomeHero() {
           )}
         >
           <Image
-            src={slide.image}
+            src={getImageSrc(slide, index)}
             alt={slide.alt}
             fill
             sizes="100vw"
             className="object-cover"
             priority={index === 0}
+            onLoad={handleImageLoad}
+            onError={() => handleImageError(slide.id)}
+            unoptimized={slide.image.startsWith("http")}
           />
           {/* Dark Overlay */}
           <div className="absolute inset-0 bg-black/40 z-10" />

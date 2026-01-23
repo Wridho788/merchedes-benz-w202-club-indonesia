@@ -35,7 +35,7 @@ export default function RootLayout({
     '@type': 'Organization',
     name: 'Mercedes-Benz W202 Club Indonesia',
     url: 'https://mbw202club.id',
-    logo: 'https://mbw202club.id/logo.png',
+    logo: 'https://mbw202clubindonesia.vercel.app/logo.png',
     description: 'Mercedes-Benz W202 Club Indonesia adalah komunitas pecinta Mercedes-Benz seri W202 di Indonesia.',
     sameAs: [
       'https://instagram.com/mbw202club',
