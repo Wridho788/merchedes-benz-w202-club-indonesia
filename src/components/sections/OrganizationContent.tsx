@@ -378,7 +378,7 @@ export default function OrganizationContent() {
                   <p className="text-sm text-gray-600 mb-3">
                     Koordinator Regional: {region.type}
                   </p>
-                  <div className="flex items-start mb-2">
+                  {/* <div className="flex items-start mb-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"
@@ -406,7 +406,7 @@ export default function OrganizationContent() {
                     <p className="text-sm">
                       Wilayah: {region.address}
                     </p>
-                  </div>
+                  </div> */}
                   <p className="text-sm text-gray-600">Member: {region.members} orang</p>
                 </div>
               ))}
