@@ -1,12 +1,16 @@
 "use client";
 
-import Image from 'next/image'
-import { useChapterById } from '@/lib/hooks/useChapterById'
-import { CHAPTER_ID } from '@/lib/constants/api'
+import Image from "next/image";
+import { useChapterById } from "@/lib/hooks/useChapterById";
+import { CHAPTER_ID } from "@/lib/constants/api";
 
 export default function OrganizationContent() {
-  const { data: chapterData, isLoading: isLoadingChapter, error } = useChapterById(CHAPTER_ID);
-  
+  const {
+    data: chapterData,
+    isLoading: isLoadingChapter,
+    error,
+  } = useChapterById(CHAPTER_ID);
+
   const chapterInfo = chapterData?.content?.result;
   const regions = chapterData?.content?.child || [];
 
@@ -86,8 +90,8 @@ export default function OrganizationContent() {
           </h1>
           <div className="w-24 h-1 bg-brand-accent mx-auto mt-4 mb-6"></div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Susunan organisasi W202 Club of Indonesia sesuai dengan AD-ART dan SK
-            Badan Hukum.
+            Susunan organisasi W202 Club of Indonesia sesuai dengan AD-ART dan
+            SK Badan Hukum.
           </p>
         </div>
 
@@ -99,7 +103,10 @@ export default function OrganizationContent() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow p-6 text-center animate-pulse">
+                <div
+                  key={i}
+                  className="bg-white rounded-lg shadow p-6 text-center animate-pulse"
+                >
                   <div className="w-24 h-24 rounded-full bg-gray-300 mx-auto mb-4" />
                   <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto mb-2" />
                   <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto" />
@@ -122,7 +129,9 @@ export default function OrganizationContent() {
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <p className="text-red-600 font-medium">Gagal memuat data organisasi</p>
+            <p className="text-red-600 font-medium">
+              Gagal memuat data organisasi
+            </p>
             <p className="text-red-500 text-sm mt-1">Silakan coba lagi nanti</p>
           </div>
         ) : (
@@ -132,7 +141,10 @@ export default function OrganizationContent() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {boardMembers.map((member) => (
-                <div key={member.id} className="bg-white rounded-lg shadow p-6 text-center">
+                <div
+                  key={member.id}
+                  className="bg-white rounded-lg shadow p-6 text-center"
+                >
                   <div className="w-24 h-24 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                     <Image
                       src={member.image}
@@ -145,7 +157,9 @@ export default function OrganizationContent() {
                   <h4 className="font-sans font-semibold text-brand-primary">
                     {member.name}
                   </h4>
-                  <p className="text-brand-accent text-sm mb-2">{member.position}</p>
+                  <p className="text-brand-accent text-sm mb-2">
+                    {member.position}
+                  </p>
                 </div>
               ))}
             </div>
@@ -157,11 +171,16 @@ export default function OrganizationContent() {
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {divisions.map((division) => (
-                  <div key={division.id} className="bg-white rounded p-4 shadow-sm">
+                  <div
+                    key={division.id}
+                    className="bg-white rounded p-4 shadow-sm"
+                  >
                     <h5 className="font-sans font-medium text-brand-primary">
                       {division.name}
                     </h5>
-                    <p className="text-sm text-gray-600">Koordinator: {division.coordinator}</p>
+                    <p className="text-sm text-gray-600">
+                      Koordinator: {division.coordinator}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -195,22 +214,32 @@ export default function OrganizationContent() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium mb-1">Sekretariat MBW202 Club Indonesia</p>
+                <p className="font-medium mb-1">
+                  Sekretariat MBW202 Club Indonesia
+                </p>
                 <p className="text-gray-600">
                   Jl. H. Jian No.83, RT 008, RW 007, Kelurahan Cipete Utara,
                   Kecamatan Kebayoran Baru, Jakarta Selatan.
                 </p>
-                <p className="text-gray-600">Jakarta Selatan, DKI Jakarta 12150</p>
+                <p className="text-gray-600">
+                  Jakarta Selatan, DKI Jakarta 12150
+                </p>
                 <div className="mt-3">
                   <p className="text-gray-700">
-                    <span className="font-medium">Email:</span>{' '}
-                    <a href="mailto:info@mbw202club.id" className="text-brand-accent hover:underline">
+                    <span className="font-medium">Email:</span>{" "}
+                    <a
+                      href="mailto:info@mbw202club.id"
+                      className="text-brand-accent hover:underline"
+                    >
                       info@mbw202club.id
                     </a>
                   </p>
                   <p className="text-gray-700">
-                    <span className="font-medium">Website:</span>{' '}
-                    <a href="https://mbw202club.id" className="text-brand-accent hover:underline">
+                    <span className="font-medium">Website:</span>{" "}
+                    <a
+                      href="https://mbw202club.id"
+                      className="text-brand-accent hover:underline"
+                    >
                       www.mbw202club.id
                     </a>
                   </p>
@@ -269,14 +298,15 @@ export default function OrganizationContent() {
                 Keanggotaan MB Club Indonesia
               </h3>
               <p className="text-gray-700">
-                MBW202CI merupakan klub yang berafiliasi dengan MB Club Indonesia
-                (MBC Ina), organisasi payung untuk seluruh klub Mercedes-Benz di
-                Indonesia. Sebagai klub yang diakui oleh MBC Ina, MBW202CI memiliki
-                hak dan kewajiban yang telah diatur dalam ketentuan MBC Ina. Melalui
-                afiliasi ini, anggota MBW202CI dapat berpartisipasi dalam
-                event-event berskala nasional yang diselenggarakan oleh MBC Ina,
-                serta mendapatkan akses ke jaringan komunitas Mercedes-Benz yang
-                lebih luas di seluruh Indonesia.
+                MBW202CI merupakan klub yang berafiliasi dengan MB Club
+                Indonesia (MBC Ina), organisasi payung untuk seluruh klub
+                Mercedes-Benz di Indonesia. Sebagai klub yang diakui oleh MBC
+                Ina, MBW202CI memiliki hak dan kewajiban yang telah diatur dalam
+                ketentuan MBC Ina. Melalui afiliasi ini, anggota MBW202CI dapat
+                berpartisipasi dalam event-event berskala nasional yang
+                diselenggarakan oleh MBC Ina, serta mendapatkan akses ke
+                jaringan komunitas Mercedes-Benz yang lebih luas di seluruh
+                Indonesia.
               </p>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
@@ -352,7 +382,10 @@ export default function OrganizationContent() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {regions.map((region) => (
-                <div key={region.id} className="bg-gray-50 rounded-lg p-6 shadow-md">
+                <div
+                  key={region.id}
+                  className="bg-gray-50 rounded-lg p-6 shadow-md"
+                >
                   <div className="flex items-center mb-4">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -391,7 +424,14 @@ export default function OrganizationContent() {
                       strokeLinejoin="round"
                       className="text-brand-accent mt-1 mr-2 flex-shrink-0"
                     >
-                      <rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect>
+                      <rect
+                        width="16"
+                        height="20"
+                        x="4"
+                        y="2"
+                        rx="2"
+                        ry="2"
+                      ></rect>
                       <path d="M9 22v-4h6v4"></path>
                       <path d="M8 6h.01"></path>
                       <path d="M16 6h.01"></path>
@@ -403,11 +443,15 @@ export default function OrganizationContent() {
                       <path d="M8 10h.01"></path>
                       <path d="M8 14h.01"></path>
                     </svg>
-                    {/* <p className="text-sm">
-                      Wilayah: {region.city}
-                    </p> */}
+                    <p className="text-sm">Wilayah: {region.city}</p>
                   </div>
-                  <p className="text-sm text-gray-600">Member: {region.members} orang</p>
+                  <div className="flex items-start mb-2">
+                    
+                    <p className="text-sm">Lokasi: {region.address}</p>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Member: {region.members} orang
+                  </p>
                 </div>
               ))}
             </div>
@@ -415,5 +459,5 @@ export default function OrganizationContent() {
         </div>
       </div>
     </section>
-  )
+  );
 }

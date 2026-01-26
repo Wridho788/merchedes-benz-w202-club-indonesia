@@ -185,3 +185,71 @@ export const fetchMembers = async (
   );
   return response.data;
 };
+
+// Event Types
+export interface EventItem {
+  id: string;
+  chapter_id: string;
+  chapter: string;
+  code: string;
+  name: string;
+  dates: string;
+  time: string;
+  desc: string;
+  image: string;
+  fee: number;
+  minimum_participants: string;
+  type: number;
+  type_desc: string;
+  done: number;
+  done_desc: string;
+}
+
+export interface EventDetail extends EventItem {
+  point: string;
+  merchant_cost: number;
+  cost1: number;
+  cost2: number;
+  allow_merchant: number;
+  allow_public: number;
+}
+
+export interface EventIndexPayload {
+  chapter: string;
+  status: string;
+  type: string;
+  date: string;
+  limit: number;
+  offset: number;
+}
+
+export interface EventIndexResponse {
+  content: {
+    record: number;
+    result: EventItem[];
+  };
+}
+
+export interface EventDetailResponse {
+  content: EventDetail;
+}
+
+// Event API Functions
+export const fetchEventIndexWebsite = async (
+  payload: EventIndexPayload
+): Promise<EventIndexResponse> => {
+  const response = await apiClient.post<EventIndexResponse>(
+    API_ENDPOINTS.EVENT_INDEX_WEBSITE,
+    payload
+  );
+  return response.data;
+};
+
+export const fetchEventById = async (
+  eventId: string
+): Promise<EventDetailResponse> => {
+  const response = await apiClient.get<EventDetailResponse>(
+    `${API_ENDPOINTS.EVENT_GET_BY_ID}/${eventId}`
+  );
+  return response.data;
+};
