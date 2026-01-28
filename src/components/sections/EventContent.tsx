@@ -28,6 +28,7 @@ export default function EventContent() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedType, setSelectedType] = useState<"" | 0 | 1>("");
   const [hasDateFilter, setHasDateFilter] = useState(false);
+  const [showAllLatestEvents, setShowAllLatestEvents] = useState(false);
 
   // Format selected date for API
   const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Format: YYYY-MM-DD
@@ -141,6 +142,11 @@ export default function EventContent() {
   const pastEvents = useMemo(() => {
     return latestEvents;
   }, [latestEvents]);
+
+  // Display events with pagination (10 per page)
+  const displayedLatestEvents = useMemo(() => {
+    return showAllLatestEvents ? pastEvents : pastEvents.slice(0, 10);
+  }, [pastEvents, showAllLatestEvents]);
 
   // Filter events for selected date in calendar
   const eventsOnSelectedDate = useMemo(() => {
@@ -956,8 +962,8 @@ export default function EventContent() {
             Event Terbaru
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {pastEvents.length > 0 ? (
-              pastEvents.map((event) => (
+            {displayedLatestEvents.length > 0 ? (
+              displayedLatestEvents.map((event) => (
                 <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full hover:shadow-lg transition-shadow">
                   <div className="h-56 overflow-hidden relative">
                     <img
@@ -1001,13 +1007,15 @@ export default function EventContent() {
               </div>
             )}
           </div>
-          <div className="text-center mt-8">
-            <a href="/kegiatan/all">
-              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background h-10 px-6 py-2 border border-brandPrimary text-brand-primary rounded font-medium hover:bg-brand-primary hover:text-white">
-                Lihat Semua Event
+          {pastEvents.length > 10 && (
+            <div className="text-center mt-8">
+              <button 
+                onClick={() => setShowAllLatestEvents(!showAllLatestEvents)}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background h-10 px-6 py-2 border border-brandPrimary text-brand-primary rounded font-medium hover:bg-brand-primary hover:text-white">
+                {showAllLatestEvents ? "Sembunyikan" : "Lihat Semua Event"}
               </button>
-            </a>
-          </div>
+            </div>
+          )}
         </div>
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
