@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import { useEventIndexWebsite } from "@/lib/hooks/useEvent";
-import { CHAPTER_ID } from "@/lib/constants/api";
+import { CATEGORIES, CHAPTER_ID } from "@/lib/constants/api";
+import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
 
 interface Event {
   id: string;
@@ -41,7 +42,16 @@ export default function EventContent() {
     offset: 0,
   });
 
-  // Map API data
+   const { data: articleData, isLoading: isArticleLoading, error: articleError } = useArticleIndexWebsite({
+      chapter: CHAPTER_ID,
+      category: CATEGORIES.CLUB_EVENT,
+      limit: 10,
+      offset: 0,
+      orderby: "",
+      order: "asc",
+    });
+
+  // Map API data for calendar section
   const events: Event[] =
     data?.content?.result?.map((item) => ({
       id: item.id,
@@ -59,6 +69,31 @@ export default function EventContent() {
       chapter: item.chapter,
       minimum_participants: item.minimum_participants,
     })) || [];
+
+  // Map API data for Event Terbaru section (from article API like HomeEvent)
+  const latestEvents: Event[] =
+    articleData?.content?.result?.map((item) => {
+      const imageUrl = item.image ?? "";
+      const hasValidImage =
+        imageUrl && !imageUrl.endsWith("/") && imageUrl.includes(".");
+
+      return {
+        id: item.id,
+        name: item.title || item.name,
+        dates: item.date || "",
+        time: "",
+        desc: item.shortdesc || item.text?.replace(/<[^>]*>/g, "").replace(/[\n\t]/g, " ").trim() || "",
+        image: hasValidImage ? imageUrl : "/Pic-2.jpg",
+        fee: 0,
+        type: 0,
+        type_desc: "INTERNAL",
+        done: 1,
+        done_desc: "Selesai",
+        code: item.id,
+        chapter: undefined,
+        minimum_participants: undefined,
+      };
+    }) || [];
 
   // Helper function to parse date string (DD Mon YYYY format)
   const parseEventDate = (dateStr: string): Date => {
@@ -102,10 +137,10 @@ export default function EventContent() {
     });
   }, [events]);
 
-  // Filter past events (done)
+  // Filter past events (done) - using latestEvents from article API
   const pastEvents = useMemo(() => {
-    return events.filter((event) => event.done === 1);
-  }, [events]);
+    return latestEvents;
+  }, [latestEvents]);
 
   // Filter events for selected date in calendar
   const eventsOnSelectedDate = useMemo(() => {
