@@ -26,6 +26,7 @@ export default function EventContent() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedType, setSelectedType] = useState<"" | 0 | 1>("");
+  const [hasDateFilter, setHasDateFilter] = useState(false);
 
   // Fetch events from API
   const { data, isLoading, error } = useEventIndexWebsite({
@@ -114,17 +115,20 @@ export default function EventContent() {
     });
   }, [events, selectedDate]);
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
+   // Close modal
+  const closeModal = () => setSelectedEvent(null);
+
+  // Clear date filter
+  const clearDateFilter = () => {
+    setSelectedDate(new Date());
+    setHasDateFilter(false);
   };
 
-  // Close modal
-  const closeModal = () => setSelectedEvent(null);
+  // Handle date selection
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    setHasDateFilter(true);
+  };
 
   // Get current month and year for display
   const currentMonthYear = selectedDate.toLocaleDateString("id-ID", {
@@ -136,16 +140,16 @@ export default function EventContent() {
     <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-sans font-bold text-mercedes-blue">
+          <h1 className="text-3xl md:text-4xl font-sans font-bold text-brand-primary">
             Event
           </h1>
-          <div className="w-24 h-1 bg-mercedes-gold mx-auto mt-4 mb-6"></div>
+          <div className="w-24 h-1 bg-brand-accent mx-auto mt-4 mb-6"></div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Berbagai event yang diselenggarakan oleh W202 Club of Indonesia.
           </p>
         </div>
         <div className="mb-16">
-          <h3 className="font-sans font-semibold text-2xl text-mercedes-blue mb-6">
+          <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
             Event Mendatang
           </h3>
           <div className="overflow-x-auto scroll-hidden pb-6">
@@ -161,7 +165,7 @@ export default function EventContent() {
                       />
                     </div>
                     <div className="p-5">
-                      <h4 className="font-sans font-semibold text-lg text-mercedes-blue line-clamp-2">
+                      <h4 className="font-sans font-semibold text-lg text-brand-primary line-clamp-2">
                         {event.name}
                       </h4>
                       <p className="text-sm text-gray-600 mb-3">{event.dates}</p>
@@ -170,7 +174,7 @@ export default function EventContent() {
                       </p>
                       <button 
                         onClick={() => setSelectedEvent(event)}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full py-2 bg-mercedes-blue text-white rounded text-sm font-medium hover:bg-opacity-90">
+                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full py-2 bg-brand-primary text-white rounded text-sm font-medium hover:bg-opacity-90">
                         Detail Event
                       </button>
                     </div>
@@ -186,7 +190,7 @@ export default function EventContent() {
         </div>
         <div className="bg-white rounded-lg shadow-lg p-8 mb-16">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-sans font-semibold text-2xl text-mercedes-blue">
+            <h3 className="font-sans font-semibold text-2xl text-brand-primary">
               Kalender Event
             </h3>
             <div className="flex space-x-2">
@@ -194,8 +198,8 @@ export default function EventContent() {
                 onClick={() => setSelectedType("")}
                 className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
                   selectedType === ""
-                    ? "bg-mercedes-blue text-white"
-                    : "bg-mercedes-light-gray text-mercedes-blue hover:bg-mercedes-gold hover:text-white"
+                    ? "bg-brand-primary text-white"
+                    : "bg-brand-light text-brand-primary hover:bg-brand-accent hover:text-white"
                 }`}>
                 Semua
               </button>
@@ -203,8 +207,8 @@ export default function EventContent() {
                 onClick={() => setSelectedType(0)}
                 className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
                   selectedType === 0
-                    ? "bg-mercedes-blue text-white"
-                    : "bg-mercedes-light-gray text-mercedes-blue hover:bg-mercedes-gold hover:text-white"
+                    ? "bg-brand-primary text-white"
+                    : "bg-brand-light text-brand-primary hover:bg-brand-accent hover:text-white"
                 }`}>
                 Internal
               </button>
@@ -212,684 +216,144 @@ export default function EventContent() {
                 onClick={() => setSelectedType(1)}
                 className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
                   selectedType === 1
-                    ? "bg-mercedes-blue text-white"
-                    : "bg-mercedes-light-gray text-mercedes-blue hover:bg-mercedes-gold hover:text-white"
+                    ? "bg-brand-primary text-white"
+                    : "bg-brand-light text-brand-primary hover:bg-brand-accent hover:text-white"
                 }`}>
                 External
               </button>
+              {hasDateFilter && (
+                <button 
+                  onClick={clearDateFilter}
+                  className="px-4 py-2 rounded text-sm font-medium transition duration-300 bg-red-500 text-white hover:bg-red-600">
+                  Clear Date Filter
+                </button>
+              )}
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h4 className="font-sans font-semibold text-lg text-mercedes-blue mb-4">
+                <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4">
                   Kalender Event
                 </h4>
                 <div className="rdp p-3 rounded-md border">
                   <div className="flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0">
-                    <div className="space-y-4 rdp-caption_start rdp-caption_end">
-                      <div className="flex justify-center pt-1 relative items-center">
-                        <div
-                          className="text-sm font-medium"
-                          aria-live="polite"
-                          role="presentation"
-                          id="react-day-picker-1"
+                    <div className="space-y-4 w-full">
+                      <div className="flex justify-between items-center pt-1">
+                        <button
+                          onClick={() => handleDateSelect(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))}
+                          className="px-3 py-2 hover:bg-gray-100 rounded"
                         >
-                          {currentMonthYear}
-                        </div>
-                        <div className="space-x-1 flex items-center">
-                          <button
-                            onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}
-                            name="previous-month"
-                            aria-label="Go to previous month"
-                            className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input hover:bg-accent hover:text-accent-foreground h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1"
-                            type="button"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="lucide lucide-chevron-left h-4 w-4 rdp-nav_icon"
-                            >
-                              <path d="m15 18-6-6 6-6"></path>
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}
-                            name="next-month"
-                            aria-label="Go to next month"
-                            className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input hover:bg-accent hover:text-accent-foreground h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1"
-                            type="button"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              className="lucide lucide-chevron-right h-4 w-4 rdp-nav_icon"
-                            >
-                              <path d="m9 18 6-6-6-6"></path>
-                            </svg>
-                          </button>
-                        </div>
+                          ← Prev
+                        </button>
+                        <div className="text-sm font-medium">{currentMonthYear}</div>
+                        <button
+                          onClick={() => handleDateSelect(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))}
+                          className="px-3 py-2 hover:bg-gray-100 rounded"
+                        >
+                          Next →
+                        </button>
                       </div>
-                      <table
-                        className="w-full border-collapse space-y-1"
-                        role="grid"
-                        aria-labelledby="react-day-picker-1"
-                      >
-                        <thead className="rdp-head">
-                          <tr className="flex">
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Sunday"
-                            >
-                              Su
-                            </th>
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Monday"
-                            >
-                              Mo
-                            </th>
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Tuesday"
-                            >
-                              Tu
-                            </th>
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Wednesday"
-                            >
-                              We
-                            </th>
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Thursday"
-                            >
-                              Th
-                            </th>
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Friday"
-                            >
-                              Fr
-                            </th>
-                            <th
-                              scope="col"
-                              className="text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]"
-                              aria-label="Saturday"
-                            >
-                              Sa
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="rdp-tbody">
-                          <tr className="flex w-full mt-2">
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
+                      <div className="grid grid-cols-7 gap-1">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                          <div key={day} className="w-9 h-9 flex items-center justify-center text-xs font-medium text-gray-500">
+                            {day}
+                          </div>
+                        ))}
+                        {(() => {
+                          const year = selectedDate.getFullYear();
+                          const month = selectedDate.getMonth();
+                          const firstDay = new Date(year, month, 1);
+                          const lastDay = new Date(year, month + 1, 0);
+                          const prevLastDay = new Date(year, month, 0);
+                          const daysInMonth = lastDay.getDate();
+                          const daysInPrevMonth = prevLastDay.getDate();
+                          const firstDayOfWeek = firstDay.getDay();
+                          
+                          const days = [];
+                          
+                          // Previous month days
+                          for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                            days.push({
+                              date: new Date(year, month - 1, daysInPrevMonth - i),
+                              isCurrentMonth: false,
+                            });
+                          }
+                          
+                          // Current month days
+                          for (let i = 1; i <= daysInMonth; i++) {
+                            days.push({
+                              date: new Date(year, month, i),
+                              isCurrentMonth: true,
+                            });
+                          }
+                          
+                          // Next month days
+                          const remainingDays = 42 - days.length;
+                          for (let i = 1; i <= remainingDays; i++) {
+                            days.push({
+                              date: new Date(year, month + 1, i),
+                              isCurrentMonth: false,
+                            });
+                          }
+                          
+                          return days.map((day, idx) => {
+                            const isSelected = isSameDay(day.date, selectedDate) && day.isCurrentMonth;
+                            return (
                               <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100 day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
+                                key={idx}
+                                onClick={() => day.isCurrentMonth && handleDateSelect(day.date)}
+                                className={`w-9 h-9 flex items-center justify-center rounded text-sm font-medium transition ${
+                                  isSelected
+                                    ? 'bg-brand-accent text-white'
+                                    : day.isCurrentMonth
+                                    ? 'hover:bg-gray-200 text-gray-900'
+                                    : 'text-gray-300'
+                                } ${!day.isCurrentMonth ? 'cursor-default' : 'cursor-pointer'}`}
+                                disabled={!day.isCurrentMonth}
                               >
-                                28
+                                {day.date.getDate()}
                               </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100 day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                29
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100 day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                30
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100 day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                31
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                1
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                2
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                3
-                              </button>
-                            </td>
-                          </tr>
-                          <tr className="flex w-full mt-2">
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                4
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                5
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                6
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                7
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                8
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                9
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                10
-                              </button>
-                            </td>
-                          </tr>
-                          <tr className="flex w-full mt-2">
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                11
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                12
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                13
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                14
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                15
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                16
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                17
-                              </button>
-                            </td>
-                          </tr>
-                          <tr className="flex w-full mt-2">
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                18
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                19
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                20
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                21
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                22
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                23
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                24
-                              </button>
-                            </td>
-                          </tr>
-                          <tr className="flex w-full mt-2">
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                25
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                26
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100 bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground bg-accent text-accent-foreground"
-                                role="gridcell"
-                                aria-selected="true"
-                                tabIndex={0}
-                                type="button"
-                              >
-                                27
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                28
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                29
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                30
-                              </button>
-                            </td>
-                            <td
-                              className="h-9 w-9 text-center text-sm p-0 relative [&amp;:has([aria-selected].day-range-end)]:rounded-r-md [&amp;:has([aria-selected].day-outside)]:bg-accent/50 [&amp;:has([aria-selected])]:bg-accent first:[&amp;:has([aria-selected])]:rounded-l-md last:[&amp;:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20"
-                              role="presentation"
-                            >
-                              <button
-                                name="day"
-                                className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-                                role="gridcell"
-                                tabIndex={-1}
-                                type="button"
-                              >
-                                31
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                            );
+                          });
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div>
-                <h4 className="font-sans font-semibold text-lg text-mercedes-blue mb-4">
-                  Event pada {selectedDate.toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </h4>
-                <div className="flex flex-col items-center justify-center h-64 bg-mercedes-light-gray rounded-lg overflow-y-auto">
+               {/* list event */}
+                <div className="flex flex-col items-center justify-center bg-brand-light rounded-lg overflow-y-auto">
                   {eventsOnSelectedDate.length > 0 ? (
-                    <div className="w-full p-4">
+                    <div className="w-full p-4 space-y-3">
                       {eventsOnSelectedDate.map((event) => (
                         <div
                           key={event.id}
-                          className="bg-white rounded-lg p-3 mb-3 last:mb-0 cursor-pointer hover:shadow-md transition"
+                          className="bg-white rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition flex"
                           onClick={() => setSelectedEvent(event)}
                         >
-                          <h5 className="font-semibold text-sm text-mercedes-blue mb-1 line-clamp-1">
-                            {event.name}
-                          </h5>
-                          <p className="text-xs text-gray-600 mb-1">{event.dates}</p>
-                          <div className="flex justify-between items-center gap-2">
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              event.type === 0
-                                ? "bg-mercedes-gold text-white"
-                                : "bg-mercedes-silver text-white"
-                            }`}>
-                              {event.type_desc}
-                            </span>
-                            {/* {event.fee > 0 && (
-                              <span className="text-xs text-gray-700">
-                                {formatCurrency(event.fee)}
-                              </span>
-                            )} */}
+                          <div className="w-24 h-24 flex-shrink-0 overflow-hidden">
+                            <img
+                              src={event.image}
+                              alt={event.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="p-3 flex-1 flex flex-col justify-between">
+                            <div>
+                              <h5 className="font-semibold text-sm text-brand-primary line-clamp-1">
+                                {event.name}
+                              </h5>
+                              <p className="text-xs text-gray-600 mt-1">{event.dates}</p>
+                            </div>
+                            <p className="text-xs text-gray-500 font-medium">⏰ {event.time}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 p-8 text-center w-full">
                       Tidak ada event pada tanggal ini
                     </p>
                   )}
@@ -899,29 +363,27 @@ export default function EventContent() {
           </div>
         </div>
         <div className="mb-16">
-          <h3 className="font-sans font-semibold text-2xl text-mercedes-blue mb-6">
+          <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
             Event Terbaru
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {pastEvents.length > 0 ? (
               pastEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  <div className="h-56 overflow-hidden">
-                    <div className="cursor-pointer w-full h-full">
-                      <img
-                        src={event.image}
-                        alt={event.name}
-                        className="w-full h-full object-cover hover:scale-105 transition duration-500"
-                      />
-                    </div>
+                <div key={event.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full hover:shadow-lg transition-shadow">
+                  <div className="h-56 overflow-hidden relative">
+                    <img
+                      src={event.image}
+                      alt={event.name}
+                      className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                    />
                   </div>
-                  <div className="p-6">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-sans font-semibold text-mercedes-blue line-clamp-2">
+                  <div className="p-6 flex flex-col flex-grow">
+                    <div className="flex justify-between items-center mb-3 gap-2">
+                      <h4 className="font-sans font-semibold text-brand-primary line-clamp-2 flex-1">
                         {event.name}
                       </h4>
-                      <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 text-xs text-white ${
-                        event.type === 0 ? "bg-mercedes-gold" : "bg-mercedes-silver"
+                      <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 text-xs text-white flex-shrink-0 ${
+                        event.type === 0 ? "bg-brand-accent" : "bg-brand-gray"
                       }`}>
                         {event.type_desc === "INTERNAL" ? "Internal" : "Eksternal"}
                       </div>
@@ -929,19 +391,16 @@ export default function EventContent() {
                     <p className="text-sm text-gray-600 mb-1">
                       {event.dates}
                     </p>
-                    <p className="text-sm mb-4 line-clamp-3">
+                    <p className="text-sm text-gray-600 mb-4">
+                      ⏰ {event.time}
+                    </p>
+                    <p className="text-sm mb-4 line-clamp-3 flex-grow">
                       {event.desc}
                     </p>
-                    {/* <div className="flex flex-wrap gap-2 mb-3">
-                      {event.fee > 0 && (
-                        <div className="inline-flex items-center border font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs bg-mercedes-light-gray px-2 py-1 rounded text-mercedes-blue">
-                          {formatCurrency(event.fee)}
-                        </div>
-                      )}
-                    </div> */}
+                  
                     <button 
                       onClick={() => setSelectedEvent(event)}
-                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full py-2 bg-mercedes-blue text-white rounded text-sm font-medium hover:bg-opacity-90">
+                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full py-2 bg-brand-primary text-white rounded text-sm font-medium hover:bg-opacity-90">
                       Detail Event
                     </button>
                   </div>
@@ -955,19 +414,19 @@ export default function EventContent() {
           </div>
           <div className="text-center mt-8">
             <a href="/kegiatan/all">
-              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background h-10 px-6 py-2 border border-mercedes-blue text-mercedes-blue rounded font-medium hover:bg-mercedes-blue hover:text-white">
+              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background h-10 px-6 py-2 border border-brandPrimary text-brand-primary rounded font-medium hover:bg-brand-primary hover:text-white">
                 Lihat Semua Event
               </button>
             </a>
           </div>
         </div>
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <h3 className="font-sans font-semibold text-2xl text-mercedes-blue mb-6">
+          <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
             Tentang Event Kami
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h4 className="font-sans font-semibold text-lg text-mercedes-blue mb-4">
+              <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4">
                 Event Internal
               </h4>
               <p className="text-gray-600 mb-4">
@@ -976,7 +435,7 @@ export default function EventContent() {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Kopdar Bulanan</span>
                     <p className="text-sm text-gray-600">
@@ -986,7 +445,7 @@ export default function EventContent() {
                   </div>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Touring</span>
                     <p className="text-sm text-gray-600">
@@ -996,7 +455,7 @@ export default function EventContent() {
                   </div>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Workshop Teknis</span>
                     <p className="text-sm text-gray-600">
@@ -1006,7 +465,7 @@ export default function EventContent() {
                   </div>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Anniversary</span>
                     <p className="text-sm text-gray-600">
@@ -1017,7 +476,7 @@ export default function EventContent() {
               </ul>
             </div>
             <div>
-              <h4 className="font-sans font-semibold text-lg text-mercedes-blue mb-4">
+              <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4">
                 Event Eksternal
               </h4>
               <p className="text-gray-600 mb-4">
@@ -1026,7 +485,7 @@ export default function EventContent() {
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Pameran Otomotif</span>
                     <p className="text-sm text-gray-600">
@@ -1036,7 +495,7 @@ export default function EventContent() {
                   </div>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Car Show</span>
                     <p className="text-sm text-gray-600">
@@ -1046,7 +505,7 @@ export default function EventContent() {
                   </div>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Gathering Komunitas</span>
                     <p className="text-sm text-gray-600">
@@ -1056,7 +515,7 @@ export default function EventContent() {
                   </div>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-mercedes-gold mr-2">•</span>
+                  <span className="text-brand-accent mr-2">•</span>
                   <div>
                     <span className="font-medium">Event Sosial</span>
                     <p className="text-sm text-gray-600">
@@ -1069,6 +528,154 @@ export default function EventContent() {
           </div>
         </div>
       </div>
+      {/* Event Detail Modal */}
+      {selectedEvent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header with Image */}
+            <div className="relative h-64">
+              <Image
+                src={selectedEvent.image}
+                alt={selectedEvent.name}
+                fill
+                className="object-cover"
+                unoptimized={selectedEvent.image.startsWith("http")}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+              
+              {/* Close Button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 text-gray-700"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              {/* Badges */}
+              <div className="absolute top-4 left-4 flex gap-2">
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                    selectedEvent.done === 0
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-500 text-white"
+                  }`}
+                >
+                  {selectedEvent.done_desc}
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                    selectedEvent.type === 1
+                      ? "bg-gray-600 text-white"
+                      : "bg-brand-accent text-white"
+                  }`}
+                >
+                  {selectedEvent.type_desc}
+                </span>
+              </div>
+
+              {/* Title over image */}
+              <div className="absolute bottom-4 left-4 right-4">
+                <h2 className="text-2xl font-bold text-white">
+                  {selectedEvent.name}
+                </h2>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-16rem)]">
+              {/* Event Info Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <span className="text-2xl mb-1 block">📅</span>
+                  <p className="text-xs text-gray-500 uppercase">Tanggal</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedEvent.dates}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <span className="text-2xl mb-1 block">⏰</span>
+                  <p className="text-xs text-gray-500 uppercase">Waktu</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedEvent.time}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <span className="text-2xl mb-1 block">👥</span>
+                  <p className="text-xs text-gray-500 uppercase">Min. Peserta</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedEvent.minimum_participants || "-"} orang
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <span className="text-2xl mb-1 block">💰</span>
+                  <p className="text-xs text-gray-500 uppercase">Biaya</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Deskripsi Event
+                </h3>
+                <p className="text-gray-600 whitespace-pre-wrap leading-relaxed">
+                  {selectedEvent.desc}
+                </p>
+              </div>
+
+              {/* Additional Info */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                  Informasi Tambahan
+                </h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  {selectedEvent.chapter && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Chapter</span>
+                      <span className="font-medium">{selectedEvent.chapter}</span>
+                    </div>
+                  )}
+                  {selectedEvent.code && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Kode</span>
+                      <span className="font-medium">{selectedEvent.code}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              {selectedEvent.done === 0 && (
+                <div className="mt-6 text-center">
+                  <a
+                    href="/contact"
+                    className="inline-flex items-center justify-center px-8 py-3 bg-brand-primary text-white rounded-lg font-medium hover:bg-opacity-90 transition-colors"
+                  >
+                    Hubungi Kami untuk Ikut Event
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
