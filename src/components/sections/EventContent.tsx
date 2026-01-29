@@ -134,9 +134,15 @@ export default function EventContent() {
   const upcomingEvents = useMemo(() => {
     return events.filter((event) => {
       const eventDate = parseEventDate(event.dates);
-      return isInNextMonth(eventDate) && event.done === 0;
+      const isUpcoming = isInNextMonth(eventDate) && event.done === 0;
+      
+      // Filter by type
+      const typeMatches =
+        selectedType === "" ? true : event.type === selectedType;
+      
+      return isUpcoming && typeMatches;
     });
-  }, [events]);
+  }, [events, selectedType]);
 
   // Filter past events (done) - using latestEvents from article API
   const pastEvents = useMemo(() => {
@@ -151,13 +157,22 @@ export default function EventContent() {
   // Filter events for selected date in calendar
   const eventsOnSelectedDate = useMemo(() => {
     return events.filter((event) => {
+      // Filter by type
+      const typeMatches =
+        selectedType === "" ? true : event.type === selectedType;
+      
+      // If date filter is not active, show all events matching type filter
+      if (!hasDateFilter) {
+        return typeMatches;
+      }
+      
+      // If date filter is active, also match the selected date
       const eventDate = parseEventDate(event.dates);
-      return (
-        isSameDay(eventDate, selectedDate) &&
-        isInCurrentMonth(eventDate)
-      );
+      const dateMatches = isSameDay(eventDate, selectedDate);
+      
+      return dateMatches && typeMatches;
     });
-  }, [events, selectedDate]);
+  }, [events, selectedDate, selectedType, hasDateFilter]);
 
    // Close modal
   const closeModal = () => setSelectedEvent(null);
@@ -940,6 +955,9 @@ export default function EventContent() {
                               <h5 className="font-semibold text-sm text-brand-primary line-clamp-1">
                                 {event.name}
                               </h5>
+                              {event.code && (
+                                <p className="text-xs text-gray-500 mt-1">Code: {event.code}</p>
+                              )}
                               <p className="text-xs text-gray-600 mt-1">{event.dates}</p>
                             </div>
                             <p className="text-xs text-gray-500 font-medium">⏰ {event.time}</p>
