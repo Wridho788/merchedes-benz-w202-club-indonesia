@@ -189,6 +189,15 @@ export default function EventContent() {
     setHasDateFilter(true);
   };
 
+  // Change month preserving day (clamped to end of month)
+  const changeMonth = (date: Date, delta: number) => {
+    const year = date.getFullYear();
+    const monthTarget = date.getMonth() + delta;
+    const day = date.getDate();
+    const lastDay = new Date(year, monthTarget + 1, 0).getDate();
+    return new Date(year, monthTarget, Math.min(day, lastDay));
+  };
+
   // Get current month and year for display
   const currentMonthYear = selectedDate.toLocaleDateString("id-ID", {
     month: "long",
@@ -309,7 +318,7 @@ export default function EventContent() {
                         </div>
                         <div className="space-x-1 flex items-center">
                           <button
-                            onClick={() => handleDateSelect(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))}
+                            onClick={() => handleDateSelect(changeMonth(selectedDate, -1))}
                             name="previous-month"
                             aria-label="Go to previous month"
                             className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input hover:bg-accent hover:text-accent-foreground h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1"
@@ -331,7 +340,7 @@ export default function EventContent() {
                             </svg>
                           </button>
                           <button
-                            onClick={() => handleDateSelect(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))}
+                            onClick={() => handleDateSelect(changeMonth(selectedDate, 1))}
                             name="next-month"
                             aria-label="Go to next month"
                             className="rdp-button_reset rdp-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input hover:bg-accent hover:text-accent-foreground h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1"
