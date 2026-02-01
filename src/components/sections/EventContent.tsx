@@ -36,6 +36,9 @@ export default function EventContent() {
   const datePickerRef = useRef<any>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState<string>("");
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // Dynamically load Vaadin date picker on client only to avoid server-side errors
   useEffect(() => {
@@ -164,7 +167,7 @@ export default function EventContent() {
     status: "",
     type: selectedType === "" ? "" : String(selectedType),
     date: hasDateFilter ? formattedDate : "",
-    limit: 20,
+    limit: 10,
     offset: 0,
   });
 
@@ -296,6 +299,11 @@ export default function EventContent() {
     return list;
   }, [events, selectedDate, selectedType, hasDateFilter]);
 
+  // Reset visible count when source list changes
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [eventsOnSelectedDate.length, selectedDate, selectedType, hasDateFilter]);
+
    // Close modal
   const closeModal = () => setSelectedEvent(null);
 
@@ -342,9 +350,6 @@ export default function EventContent() {
           <UpcomingEvents
             selectedType={selectedType}
             onSelectEvent={setSelectedEvent}
-            events={events}
-            isLoading={isLoading}
-            error={error}
           />
         </div> 
         <div className="bg-white rounded-lg shadow-lg p-8 mb-16 relative">
@@ -1090,7 +1095,23 @@ export default function EventContent() {
               </div>
               <div>
                {/* list event */}
-                <div className="flex flex-col items-stretch justify-start bg-brand-light rounded-lg overflow-y-auto max-h-[36rem] p-4">
+                <div
+                  ref={listRef}
+                  onScroll={(e) => {
+                    const el = e.currentTarget as HTMLDivElement;
+                    if (loadingMore) return;
+                    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 60) {
+                      if (visibleCount < eventsOnSelectedDate.length) {
+                        setLoadingMore(true);
+                        setTimeout(() => {
+                          setVisibleCount((v) => Math.min(v + 10, eventsOnSelectedDate.length));
+                          setLoadingMore(false);
+                        }, 350);
+                      }
+                    }
+                  }}
+                  className="flex flex-col items-stretch justify-start bg-brand-light rounded-lg overflow-y-auto max-h-[36rem] p-4"
+                >
                   {isLoading ? (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">
@@ -1105,18 +1126,20 @@ export default function EventContent() {
                     </div>
                   ) : eventsOnSelectedDate.length > 0 ? (
                     <div className="w-full p-4 space-y-3">
-                      {eventsOnSelectedDate.map((event) => (
+                      {eventsOnSelectedDate.slice(0, visibleCount).map((event) => (
                         <div
                           key={event.id}
                           className="bg-white rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition flex"
                           onClick={() => setSelectedEvent(event)}
                         >
-                          <div className="w-24 h-24 flex-shrink-0 overflow-hidden">
-                            <img
-                              src={event.image}
-                              alt={event.name}
-                              className="w-full h-full object-cover"
-                            />
+                          <div className="flex-shrink-0 overflow-hidden" style={{ width: '30%', maxWidth: '8rem' }}>
+                            <div className="h-20 w-full overflow-hidden">
+                              <img
+                                src={event.image}
+                                alt={event.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
                           </div>
                           <div className="p-3 flex-1 flex flex-col justify-between">
                             <div>
@@ -1132,6 +1155,17 @@ export default function EventContent() {
                           </div>
                         </div>
                       ))}
+
+                      {loadingMore && (
+                        <div className="w-full flex items-center justify-center py-3">
+                          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
+                        </div>
+                      )}
+
+                      {visibleCount < eventsOnSelectedDate.length && !loadingMore && (
+                        <div className="w-full text-center text-sm text-gray-500 py-2">Scroll untuk memuat lebih banyak</div>
+                      )}
+
                     </div>
                   ) : (
                     <p className="text-gray-500 p-8 text-center w-full">
@@ -1428,33 +1462,30 @@ export default function EventContent() {
                 <h3 className="text-sm font-semibold text-gray-800 mb-3">
                   Informasi Tambahan
                 </h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                   {selectedEvent.chapter && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Chapter</span>
-                      <span className="font-medium">{selectedEvent.chapter}</span>
+                    <div className="flex items-start gap-4">
+                      <dt className="text-gray-500 w-24">Chapter</dt>
+                      <dd className="font-medium text-gray-800 break-words">{selectedEvent.chapter}</dd>
                     </div>
                   )}
                   {selectedEvent.code && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Kode</span>
-                      <span className="font-medium">{selectedEvent.code}</span>
+                    <div className="flex items-start gap-4">
+                      <dt className="text-gray-500 w-24">Kode</dt>
+                      <dd className="font-medium text-gray-800 break-words">{selectedEvent.code}</dd>
                     </div>
                   )}
-                </div>
+                  <div className="flex items-start gap-4">
+                    <dt className="text-gray-500 w-24">Tipe</dt>
+                    <dd className="font-medium text-gray-800">{selectedEvent.type_desc}</dd>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <dt className="text-gray-500 w-24">Status</dt>
+                    <dd className="font-medium text-gray-800">{selectedEvent.done_desc}</dd>
+                  </div>
+                </dl>
               </div>
-
-              {/* CTA Button */}
-              {selectedEvent.done === 0 && (
-                <div className="mt-6 text-center">
-                  <a
-                    href="/contact"
-                    className="inline-flex items-center justify-center px-8 py-3 bg-brand-primary text-white rounded-lg font-medium hover:bg-opacity-90 transition-colors"
-                  >
-                    Hubungi Kami untuk Ikut Event
-                  </a>
-                </div>
-              )}
+             
             </div>
           </div>
         </div>

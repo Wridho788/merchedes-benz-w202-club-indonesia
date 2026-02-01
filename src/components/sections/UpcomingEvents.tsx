@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import { useEventIndexWebsite } from "@/lib/hooks/useEvent";
+import { CHAPTER_ID } from "@/lib/constants/api";
 
 interface Event {
   id: string;
@@ -22,14 +24,37 @@ interface Event {
 type Props = {
   selectedType: "" | 0 | 1;
   onSelectEvent: (event: Event) => void;
-  events?: Event[];
-  isLoading?: boolean;
-  error?: any;
 };
 
-export default function UpcomingEvents({ selectedType, onSelectEvent, events = [], isLoading = false, error }: Props) {
-  // `events` are provided by parent to avoid duplicate fetching. Child just filters for "upcoming" (next month)
+export default function UpcomingEvents({ selectedType, onSelectEvent }: Props) {
+  // This component fetches its own events (type=0) and applies local filtering for "upcoming"
 
+  const { data, isLoading, error } = useEventIndexWebsite({
+    chapter: String(CHAPTER_ID),
+    status: "",
+    type: "0",
+    date: "",
+    limit: 20,
+    offset: 0,
+  });
+
+  const events: Event[] =
+    data?.content?.result?.map((item) => ({
+      id: item.id,
+      name: item.name,
+      dates: item.dates,
+      time: item.time,
+      desc: item.desc || "",
+      image: item.image || "/Pic-2.jpg",
+      fee: item.fee,
+      type: item.type,
+      type_desc: item.type_desc,
+      done: item.done,
+      done_desc: item.done_desc,
+      code: item.code,
+      chapter: item.chapter,
+      minimum_participants: item.minimum_participants,
+    })) || []; 
 
   const parseEventDate = (dateStr: string): Date => {
     return new Date(dateStr);
