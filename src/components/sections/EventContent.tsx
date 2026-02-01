@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
+import "@vaadin/date-picker";
 import { useEventIndexWebsite } from "@/lib/hooks/useEvent";
 import { CATEGORIES, CHAPTER_ID } from "@/lib/constants/api";
 import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
+import UpcomingEvents from "@/components/sections/UpcomingEvents";
 
 interface Event {
   id: string;
@@ -29,6 +31,123 @@ export default function EventContent() {
   const [selectedType, setSelectedType] = useState<"" | 0 | 1>("");
   const [hasDateFilter, setHasDateFilter] = useState(false);
   const [showAllLatestEvents, setShowAllLatestEvents] = useState(false);
+
+  const calendarRef = useRef<HTMLDivElement | null>(null);
+  const datePickerRef = useRef<any>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerValue, setDatePickerValue] = useState<string>("");
+
+  const openCalendar = () => {
+    setShowDatePicker(true);
+  };
+
+  // When picker opens, prefill with today's date, lock scroll, and focus picker
+  useEffect(() => {
+    if (showDatePicker) {
+      // prefill today's date (date format YYYY-MM-DD) once picker is available
+      const todayStr = new Date().toISOString().slice(0, 10);
+      if (datePickerRef.current) {
+        datePickerRef.current.value = todayStr;
+        setDatePickerValue(todayStr);
+        try { datePickerRef.current.focus(); } catch (e) {}
+      }
+      // lock background scroll
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      const t = setInterval(() => {
+        // if picker becomes available, ensure value and focus
+        if (datePickerRef.current) {
+          datePickerRef.current.value = todayStr;
+          setDatePickerValue(todayStr);
+          try { datePickerRef.current.focus(); } catch (e) {}
+          clearInterval(t);
+        }
+      }, 50);
+      return () => {
+        clearInterval(t);
+        document.body.style.overflow = prevOverflow || "";
+      };
+    }
+  }, [showDatePicker]);
+
+  // Listen to value changes on the vaadin date picker and store temporarily; apply only on OK
+  useEffect(() => {
+    if (!datePickerRef.current) return;
+    const el = datePickerRef.current;
+    const handler = (e: any) => {
+      const val = e.detail?.value ?? el.value;
+      const dateVal = String(val || "");
+      // update temporary picker value (do not auto-apply)
+      setDatePickerValue(dateVal);
+    };
+    el.addEventListener("value-changed", handler);
+    return () => el.removeEventListener("value-changed", handler);
+  }, [datePickerRef.current]);
+
+  // When user clicks any day cell in the calendar, immediately filter by that date
+  useEffect(() => {
+    const container = calendarRef.current;
+    if (!container) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest('button[name="day"]') as HTMLButtonElement | null;
+      if (!btn) return;
+      const text = btn.textContent?.trim();
+      if (!text) return;
+      const dayNum = parseInt(text, 10);
+      if (isNaN(dayNum)) return;
+      const isOutside = btn.classList.contains('day-outside');
+      let year = selectedDate.getFullYear();
+      let month = selectedDate.getMonth();
+      if (isOutside) {
+        // heuristic: days > 15 belong to previous month, otherwise next month
+        if (dayNum > 15) {
+          month = month - 1;
+          if (month < 0) { month = 11; year -= 1; }
+        } else {
+          month = month + 1;
+          if (month > 11) { month = 0; year += 1; }
+        }
+      }
+      const newDate = new Date(year, month, dayNum);
+      handleDateSelect(newDate);
+    };
+    container.addEventListener('click', handler);
+    return () => container.removeEventListener('click', handler);
+  }, [selectedDate]);
+
+  // Update calendar UI to highlight selected day (adds classes to matching day button)
+  useEffect(() => {
+    const container = calendarRef.current;
+    if (!container) return;
+    const buttons = Array.from(container.querySelectorAll('button[name="day"]')) as HTMLButtonElement[];
+    buttons.forEach((btn) => {
+      const text = btn.textContent?.trim();
+      if (!text) return;
+      const dayNum = parseInt(text, 10);
+      if (isNaN(dayNum)) return;
+      const isOutside = btn.classList.contains('day-outside');
+      let year = selectedDate.getFullYear();
+      let month = selectedDate.getMonth();
+      if (isOutside) {
+        if (dayNum > 15) {
+          month = month - 1;
+          if (month < 0) { month = 11; year -= 1; }
+        } else {
+          month = month + 1;
+          if (month > 11) { month = 0; year += 1; }
+        }
+      }
+      const btnDate = new Date(year, month, dayNum);
+      if (isSameDay(btnDate, selectedDate)) {
+        btn.classList.add("bg-brand-primary", "text-white", "rounded-full");
+        btn.setAttribute("aria-selected", "true");
+      } else {
+        btn.classList.remove("bg-brand-primary", "text-white", "rounded-full");
+        btn.removeAttribute("aria-selected");
+      }
+    });
+  }, [selectedDate]);
 
   // Format selected date for API
   const formattedDate = selectedDate.toLocaleDateString("en-CA"); // Format: YYYY-MM-DD
@@ -130,16 +249,12 @@ export default function EventContent() {
     );
   };
 
-  // Filter upcomming events (next month, not done)
-  const upcomingEvents = useMemo(() => {
+  // Compute upcoming events here (next month and not done) and pass to UpcomingEvents so it doesn't refetch.
+  const upcomingEventsInParent = useMemo(() => {
     return events.filter((event) => {
       const eventDate = parseEventDate(event.dates);
       const isUpcoming = isInNextMonth(eventDate) && event.done === 0;
-      
-      // Filter by type
-      const typeMatches =
-        selectedType === "" ? true : event.type === selectedType;
-      
+      const typeMatches = selectedType === "" ? true : event.type === selectedType;
       return isUpcoming && typeMatches;
     });
   }, [events, selectedType]);
@@ -217,51 +332,89 @@ export default function EventContent() {
           </p>
         </div>
         <div className="mb-16">
-          <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
-            Event Mendatang
-          </h3>
-          <div className="overflow-x-auto scroll-hidden pb-6">
-            <div className="flex space-x-6 min-w-max">
-              {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event) => (
-                  <div key={event.id} className="w-72 bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="h-40 overflow-hidden relative">
-                      <img
-                        src={event.image}
-                        alt={event.name}
-                        className="w-full h-full object-cover hover:scale-105 transition duration-500"
-                      />
-                    </div>
-                    <div className="p-5">
-                      <h4 className="font-sans font-semibold text-lg text-brand-primary line-clamp-2">
-                        {event.name}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-3">{event.dates}</p>
-                      <p className="text-sm mb-4 line-clamp-2">
-                        {event.desc}
-                      </p>
-                      <button 
-                        onClick={() => setSelectedEvent(event)}
-                        className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full py-2 bg-brand-primary text-white rounded text-sm font-medium hover:bg-opacity-90">
-                        Detail Event
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="w-full text-center py-8">
-                  <p className="text-gray-500">Tidak ada event mendatang</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-16">
-          <div className="flex justify-between items-center mb-6">
+          <UpcomingEvents
+            selectedType={selectedType}
+            onSelectEvent={setSelectedEvent}
+            events={upcomingEventsInParent}
+            isLoading={isLoading}
+            error={error}
+          />
+        </div> 
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-16 relative">
+          <div className="grid grid-cols-2 items-center mb-6">
             <h3 className="font-sans font-semibold text-2xl text-brand-primary">
               Kalender Event
             </h3>
-            <div className="flex space-x-2">
+            <div className="flex justify-end">
+              <button
+                onClick={openCalendar}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-medium bg-brand-light text-brand-primary hover:bg-brand-accent hover:text-white"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Buka Kalender</span>
+              </button>
+            </div>
+          </div>
+
+          {showDatePicker && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Pilih tanggal"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setShowDatePicker(false);
+              }}
+              onClick={() => setShowDatePicker(false)}
+            >
+              <div className="bg-white p-4 rounded shadow-lg w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                <div ref={(el) => {
+                  if (!el) return;
+                  const anyEl: any = el;
+                  if (!anyEl._picker) {
+                    const p = document.createElement("vaadin-date-picker");
+                    p.style.width = "100%";
+                    anyEl.appendChild(p);
+                    anyEl._picker = p;
+                  }
+                  datePickerRef.current = anyEl._picker;
+                }} />
+                <div className="mt-3 flex justify-between items-center">
+                  <div className="text-sm text-gray-600">Pilih tanggal</div>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => {
+                        const val = (datePickerRef.current && (datePickerRef.current.value || datePickerValue)) || datePickerValue;
+                        if (val) {
+                          setSelectedDate(new Date(String(val)));
+                          setHasDateFilter(true);
+                          calendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        setShowDatePicker(false);
+                      }}
+                      className="text-sm px-3 py-1 rounded bg-brand-primary text-white hover:bg-brand-primary/90 mr-2"
+                      aria-label="OK pilih tanggal"
+                    >
+                      OK
+                    </button>
+                    <button
+                      onClick={() => setShowDatePicker(false)}
+                      className="text-sm px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
+                      aria-label="Batal"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="flex space-x-2 mb-4">
               <button 
                 onClick={() => setSelectedType("")}
                 className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
@@ -296,15 +449,14 @@ export default function EventContent() {
                   Clear Date Filter
                 </button>
               )}
-            </div>
-          </div>
+            </div> 
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4">
                   Kalender Event
                 </h4>
-                <div className="rdp p-3 rounded-md border">
+                <div className="rdp p-3 rounded-md border" ref={calendarRef}>
                   <div className="flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0">
                     <div className="space-y-4 rdp-caption_start rdp-caption_end">
                       <div className="flex justify-center pt-1 relative items-center">
