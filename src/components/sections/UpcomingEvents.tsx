@@ -53,14 +53,14 @@ export default function UpcomingEvents({ selectedType, onSelectEvent, events = [
   };
 
   const upcomingEvents = useMemo(() => {
-    const filtered = events.filter((event) => {
-      const eventDate = parseEventDate(event.dates);
-      const isUpcoming = (isInCurrentMonth(eventDate) || isInNextMonth(eventDate)) && event.done === 0;
-      const typeMatches = selectedType === "" ? true : event.type === selectedType;
-      return isUpcoming && typeMatches;
-    });
-    // sort by date ascending
-    filtered.sort((a, b) => parseEventDate(a.dates).getTime() - parseEventDate(b.dates).getTime());
+    // Show all events with status 0 (not done), apply type filter and limit to 10 for better UX
+    const filtered = events
+      .filter((event) => {
+        const typeMatches = selectedType === "" ? true : event.type === selectedType;
+        return event.done === 0 && typeMatches;
+      })
+      .sort((a, b) => parseEventDate(a.dates).getTime() - parseEventDate(b.dates).getTime())
+      .slice(0, 10);
     return filtered;
   }, [events, selectedType]);
 

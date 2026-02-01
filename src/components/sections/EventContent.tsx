@@ -277,22 +277,23 @@ export default function EventContent() {
 
   // Filter events for selected date in calendar
   const eventsOnSelectedDate = useMemo(() => {
-    return events.filter((event) => {
-      // Filter by type
-      const typeMatches =
-        selectedType === "" ? true : event.type === selectedType;
-      
-      // If date filter is not active, show all events matching type filter
-      if (!hasDateFilter) {
-        return typeMatches;
-      }
-      
-      // If date filter is active, also match the selected date
-      const eventDate = parseEventDate(event.dates);
-      const dateMatches = isSameDay(eventDate, selectedDate);
-      
-      return dateMatches && typeMatches;
+    // Start with type filter
+    let list = events.filter((event) => {
+      const typeMatches = selectedType === "" ? true : event.type === selectedType;
+      return typeMatches;
     });
+
+    if (hasDateFilter) {
+      // If date filter is active, show events matching selected date
+      list = list.filter((event) => isSameDay(parseEventDate(event.dates), selectedDate));
+    } else {
+      // If no date filter, show upcoming (not done) events only, sorted and limited for UX
+      list = list.filter((event) => event.done === 0);
+      list.sort((a, b) => parseEventDate(a.dates).getTime() - parseEventDate(b.dates).getTime());
+      list = list.slice(0, 20);
+    }
+
+    return list;
   }, [events, selectedDate, selectedType, hasDateFilter]);
 
    // Close modal
@@ -341,7 +342,7 @@ export default function EventContent() {
           <UpcomingEvents
             selectedType={selectedType}
             onSelectEvent={setSelectedEvent}
-            events={upcomingEventsInParent}
+            events={events}
             isLoading={isLoading}
             error={error}
           />
@@ -1089,7 +1090,7 @@ export default function EventContent() {
               </div>
               <div>
                {/* list event */}
-                <div className="flex flex-col items-center justify-center bg-brand-light rounded-lg overflow-y-auto min-h-96">
+                <div className="flex flex-col items-stretch justify-start bg-brand-light rounded-lg overflow-y-auto max-h-[36rem] p-4">
                   {isLoading ? (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">
