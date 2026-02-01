@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
-import "@vaadin/date-picker";
 import { useEventIndexWebsite } from "@/lib/hooks/useEvent";
+
 import { CATEGORIES, CHAPTER_ID } from "@/lib/constants/api";
 import { useArticleIndexWebsite } from "@/lib/hooks/useArticleIndexWebsite";
 import UpcomingEvents from "@/components/sections/UpcomingEvents";
@@ -36,6 +36,12 @@ export default function EventContent() {
   const datePickerRef = useRef<any>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerValue, setDatePickerValue] = useState<string>("");
+
+  // Dynamically load Vaadin date picker on client only to avoid server-side errors
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    import("@vaadin/date-picker").catch(() => {});
+  }, []);
 
   const openCalendar = () => {
     setShowDatePicker(true);
