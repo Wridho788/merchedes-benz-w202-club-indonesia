@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useEventIndexWebsite } from "@/lib/hooks/useEvent";
 import { CHAPTER_ID } from "@/lib/constants/api";
 
@@ -29,17 +29,30 @@ type Props = {
 export default function UpcomingEvents({ selectedType, onSelectEvent }: Props) {
   // This component fetches its own events (type=0) and applies local filtering for "upcoming"
 
-  const { data, isLoading, error } = useEventIndexWebsite({
+  // Keep track of which status is shown: "0" = mendatang, "1" = terlewat
+  const [statusFilter, setStatusFilter] = useState<"0" | "1">("0");
+
+  // Fetch both upcoming and past events so we can show counts and switch instantly
+  const upcomingQuery = useEventIndexWebsite({
     chapter: String(CHAPTER_ID),
-    status: "",
-    type: "0",
+    status: "0",
+    type: "",
     date: "",
-    limit: 20,
+    limit: 50,
     offset: 0,
   });
 
-  const events: Event[] =
-    data?.content?.result?.map((item) => ({
+  const pastQuery = useEventIndexWebsite({
+    chapter: String(CHAPTER_ID),
+    status: "1",
+    type: "",
+    date: "",
+    limit: 50,
+    offset: 0,
+  });
+
+  const mapEvents = (data: any): Event[] =>
+    data?.content?.result?.map((item: any) => ({
       id: item.id,
       name: item.name,
       dates: item.dates,
@@ -56,47 +69,64 @@ export default function UpcomingEvents({ selectedType, onSelectEvent }: Props) {
       minimum_participants: item.minimum_participants,
     })) || []; 
 
-  const parseEventDate = (dateStr: string): Date => {
-    return new Date(dateStr);
-  };
-
-  const isInNextMonth = (eventDate: Date): boolean => {
-    const now = new Date();
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return (
-      eventDate.getMonth() === nextMonth.getMonth() &&
-      eventDate.getFullYear() === nextMonth.getFullYear()
-    );
-  };
-
-  const isInCurrentMonth = (eventDate: Date): boolean => {
-    const now = new Date();
-    return (
-      eventDate.getMonth() === now.getMonth() &&
-      eventDate.getFullYear() === now.getFullYear()
-    );
-  };
+  const parseEventDate = (dateStr: string): Date => new Date(dateStr);
 
   const upcomingEvents = useMemo(() => {
-    // Show all events with status 0 (not done), apply type filter and limit to 10 for better UX
-    const filtered = events
-      .filter((event) => {
-        const typeMatches = selectedType === "" ? true : event.type === selectedType;
-        return event.done === 0 && typeMatches;
-      })
+    const events = mapEvents(upcomingQuery.data);
+    return events
+      .filter((event) => (selectedType === "" ? true : event.type === selectedType) && event.done === 0)
       .sort((a, b) => parseEventDate(a.dates).getTime() - parseEventDate(b.dates).getTime())
       .slice(0, 10);
-    return filtered;
-  }, [events, selectedType]);
+  }, [upcomingQuery.data, selectedType]);
+
+  const pastEvents = useMemo(() => {
+    const events = mapEvents(pastQuery.data);
+    return events
+      .filter((event) => (selectedType === "" ? true : event.type === selectedType) && event.done === 1)
+      .sort((a, b) => parseEventDate(b.dates).getTime() - parseEventDate(a.dates).getTime())
+      .slice(0, 10);
+  }, [pastQuery.data, selectedType]);
+
+  const upcomingCount = upcomingQuery.data?.content?.record ?? upcomingEvents.length;
+  const pastCount = pastQuery.data?.content?.record ?? pastEvents.length;
+
+  const activeEvents = statusFilter === "0" ? upcomingEvents : pastEvents;
+  const loading = statusFilter === "0" ? upcomingQuery.isLoading : pastQuery.isLoading;
+  const error = statusFilter === "0" ? upcomingQuery.error : pastQuery.error;
 
   return (
     <div>
-      <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
-        Event Mendatang
-      </h3>
+      <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-4">{statusFilter === "0" ? "Event Mendatang" : "Event Terlewat"}</h3>
+
+      {/* Segmented control */}
+      <div className="flex items-center justify-start gap-3 mb-3">
+        <button
+          onClick={() => setStatusFilter("0")}
+          aria-pressed={statusFilter === "0"}
+          className={`inline-flex items-center gap-3 px-4 py-2 rounded-full transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            statusFilter === "0" ? "bg-brand-primary text-white shadow" : "bg-white border border-gray-200 text-gray-700"
+          }`}
+        >
+          <span>Mendatang</span>
+          <span className="ml-2 inline-flex items-center justify-center bg-white/10 text-xs rounded-full px-2 py-0.5">{upcomingCount}</span>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("1")}
+          aria-pressed={statusFilter === "1"}
+          className={`inline-flex items-center gap-3 px-4 py-2 rounded-full transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            statusFilter === "1" ? "bg-brand-primary text-white shadow" : "bg-white border border-gray-200 text-gray-700"
+          }`}
+        >
+          <span>Terlewat</span>
+          <span className="ml-2 inline-flex items-center justify-center bg-white/10 text-xs rounded-full px-2 py-0.5">{pastCount}</span>
+        </button>
+      </div>
+
+      <p className="text-sm text-gray-500 mb-6">{statusFilter === "0" ? "Menampilkan event mendatang." : "Menampilkan event yang sudah berlalu."}</p>
       <div className="overflow-x-auto scroll-hidden pb-6">
         <div className="flex space-x-6 min-w-max">
-          {isLoading ? (
+          {loading ? (
             <div className="w-full text-center py-8">
               <p className="text-gray-500">Memuat event...</p>
             </div>
@@ -104,8 +134,8 @@ export default function UpcomingEvents({ selectedType, onSelectEvent }: Props) {
             <div className="w-full text-center py-8">
               <p className="text-red-500">Gagal memuat event</p>
             </div>
-          ) : upcomingEvents.length > 0 ? (
-            upcomingEvents.map((event) => (
+          ) : activeEvents.length > 0 ? (
+            activeEvents.map((event) => (
               <div key={event.id} className="w-72 bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="h-40 overflow-hidden relative">
                   <img
@@ -115,9 +145,12 @@ export default function UpcomingEvents({ selectedType, onSelectEvent }: Props) {
                   />
                 </div>
                 <div className="p-5">
-                  <h4 className="font-sans font-semibold text-lg text-brand-primary line-clamp-2">
-                    {event.name}
-                  </h4>
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-sans font-semibold text-lg text-brand-primary line-clamp-2">{event.name}</h4>
+                    {statusFilter === "1" && (
+                      <span className="ml-2 text-xs text-gray-500">Terlewat</span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-600 mb-3">{event.dates}</p>
                   <p className="text-sm mb-4 line-clamp-2">{event.desc}</p>
                   <button
@@ -131,7 +164,7 @@ export default function UpcomingEvents({ selectedType, onSelectEvent }: Props) {
             ))
           ) : (
             <div className="w-full text-center py-8">
-              <p className="text-gray-500">Tidak ada event mendatang</p>
+              <p className="text-gray-500">Tidak ada event untuk kategori ini</p>
             </div>
           )}
         </div>
