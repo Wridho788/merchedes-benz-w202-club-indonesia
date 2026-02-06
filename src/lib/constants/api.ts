@@ -9,11 +9,11 @@ export const API_ENDPOINTS = {
   MEMBER: '/customer',
   EVENT_INDEX_WEBSITE: '/event/index_website',
   EVENT_GET_BY_ID: '/event/get_by_id_website',
-  PARTNER:'partner/',
-  SPONSORSHIP: 'partnership/sponsorship',
-  PARTNER_GET_BY_ID: 'partner/get/',
-  PARTNER_CITY: 'partner/city',
-  PARTNER_CATEGORY: 'partner/category',
+  PARTNER:'/partner',
+  SPONSORSHIP: '/partner/sponsorship',
+  PARTNER_GET_BY_ID: '/partner/get/',
+  PARTNER_CITY: '/partner/city',
+  PARTNER_CATEGORY: '/partner/category',
 } as const;
 
 // Chapter ID constant

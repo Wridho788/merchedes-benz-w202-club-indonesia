@@ -9,6 +9,116 @@ export const apiClient = axios.create({
   },
 });
 
+
+// API Functions
+export const fetchSliderWebsite = async (
+  limit: string = "10",
+  offset: string = "0",
+): Promise<SliderResponse> => {
+  const response = await apiClient.post<SliderResponse>(
+    API_ENDPOINTS.SLIDER_WEBSITE,
+    {
+      limit,
+      offset,
+    },
+  );
+  return response.data;
+};
+
+export const fetchArticleIndexWebsite = async (
+  payload: ArticleIndexPayload,
+): Promise<ArticleResponse> => {
+  const response = await apiClient.post<ArticleResponse>(
+    API_ENDPOINTS.ARTICLE_INDEX_WEBSITE,
+    payload,
+  );
+  return response.data;
+};
+
+export const fetchChapterById = async (
+  chapterId: number,
+): Promise<ChapterResponse> => {
+  const response = await apiClient.get<ChapterResponse>(
+    `${API_ENDPOINTS.CHAPTER_GET_BY_ID}/${chapterId}`,
+  );
+  return response.data;
+};
+
+export const fetchMembers = async (
+  payload: MemberPayload,
+): Promise<MemberResponse> => {
+  const response = await apiClient.post<MemberResponse>(
+    API_ENDPOINTS.MEMBER,
+    payload,
+  );
+  return response.data;
+};
+
+
+// Event API Functions
+export const fetchEventIndexWebsite = async (
+  payload: EventIndexPayload,
+): Promise<EventIndexResponse> => {
+  const response = await apiClient.post<EventIndexResponse>(
+    API_ENDPOINTS.EVENT_INDEX_WEBSITE,
+    payload,
+  );
+  return response.data;
+};
+
+export const fetchEventById = async (
+  eventId: string,
+): Promise<EventDetailResponse> => {
+  const response = await apiClient.get<EventDetailResponse>(
+    `${API_ENDPOINTS.EVENT_GET_BY_ID}/${eventId}`,
+  );
+  return response.data;
+};
+
+export const fetchPartner = async (
+  payload: PartnerPayload,
+): Promise<PartnerResponse> => {
+  const response = await apiClient.post<PartnerResponse>(
+    API_ENDPOINTS.PARTNER,
+    payload,
+  );
+  return response.data;
+};
+
+export const fetchPartnerSponsorship = async (
+  payload: PartnerPayload,
+): Promise<PartnerResponse> => {
+  const response = await apiClient.post<PartnerResponse>(
+    API_ENDPOINTS.SPONSORSHIP,
+    payload,
+  );
+  return response.data;
+};
+
+export const fetchPartnerById = async (
+  partnerId: string,
+): Promise<PartnerDetailResponse> => {
+  const response = await apiClient.get<PartnerDetailResponse>(
+    `${API_ENDPOINTS.PARTNER_GET_BY_ID}/${partnerId}`,
+  );
+  return response.data;
+};
+
+export const fetchPartnerCities = async (): Promise<PartnerCityResponse> => {
+  const response = await apiClient.get<PartnerCityResponse>(
+    API_ENDPOINTS.PARTNER_CITY,
+  );
+  return response.data;
+};
+
+export const fetchPartnerCategories = async (): Promise<PartnerCategoryResponse> => {
+  const response = await apiClient.get<PartnerCategoryResponse>(
+    API_ENDPOINTS.PARTNER_CATEGORY,
+  );
+  return response.data;
+};
+
+
 // Types
 export interface SliderItem {
   id: string;
@@ -142,51 +252,6 @@ export interface MemberPayload {
   offset: number;
 }
 
-// API Functions
-export const fetchSliderWebsite = async (
-  limit: string = "10",
-  offset: string = "0",
-): Promise<SliderResponse> => {
-  const response = await apiClient.post<SliderResponse>(
-    API_ENDPOINTS.SLIDER_WEBSITE,
-    {
-      limit,
-      offset,
-    },
-  );
-  return response.data;
-};
-
-export const fetchArticleIndexWebsite = async (
-  payload: ArticleIndexPayload,
-): Promise<ArticleResponse> => {
-  const response = await apiClient.post<ArticleResponse>(
-    API_ENDPOINTS.ARTICLE_INDEX_WEBSITE,
-    payload,
-  );
-  return response.data;
-};
-
-export const fetchChapterById = async (
-  chapterId: number,
-): Promise<ChapterResponse> => {
-  const response = await apiClient.get<ChapterResponse>(
-    `${API_ENDPOINTS.CHAPTER_GET_BY_ID}/${chapterId}`,
-  );
-  return response.data;
-};
-
-export const fetchMembers = async (
-  payload: MemberPayload,
-): Promise<MemberResponse> => {
-  const response = await apiClient.post<MemberResponse>(
-    API_ENDPOINTS.MEMBER,
-    payload,
-  );
-  return response.data;
-};
-
-// Event Types
 export interface EventItem {
   id: string;
   chapter_id: string;
@@ -303,66 +368,3 @@ export interface PartnerCityname {
 export interface PartnerCategory {
   category: string;
 }
-
-// Event API Functions
-export const fetchEventIndexWebsite = async (
-  payload: EventIndexPayload,
-): Promise<EventIndexResponse> => {
-  const response = await apiClient.post<EventIndexResponse>(
-    API_ENDPOINTS.EVENT_INDEX_WEBSITE,
-    payload,
-  );
-  return response.data;
-};
-
-export const fetchEventById = async (
-  eventId: string,
-): Promise<EventDetailResponse> => {
-  const response = await apiClient.get<EventDetailResponse>(
-    `${API_ENDPOINTS.EVENT_GET_BY_ID}/${eventId}`,
-  );
-  return response.data;
-};
-
-export const fetchPartner = async (
-  payload: PartnerPayload,
-): Promise<PartnerResponse> => {
-  const response = await apiClient.post<PartnerResponse>(
-    API_ENDPOINTS.PARTNER,
-    payload,
-  );
-  return response.data;
-};
-
-export const fetchPartnerSponsorship = async (
-  payload: PartnerPayload,
-): Promise<PartnerResponse> => {
-  const response = await apiClient.post<PartnerResponse>(
-    API_ENDPOINTS.SPONSORSHIP,
-    payload,
-  );
-  return response.data;
-};
-
-export const fetchPartnerById = async (
-  partnerId: string,
-): Promise<PartnerDetailResponse> => {
-  const response = await apiClient.get<PartnerDetailResponse>(
-    `${API_ENDPOINTS.PARTNER_GET_BY_ID}/${partnerId}`,
-  );
-  return response.data;
-};
-
-export const fetchPartnerCities = async (): Promise<PartnerCityResponse> => {
-  const response = await apiClient.get<PartnerCityResponse>(
-    API_ENDPOINTS.PARTNER_CITY,
-  );
-  return response.data;
-};
-
-export const fetchPartnerCategories = async (): Promise<PartnerCategoryResponse> => {
-  const response = await apiClient.get<PartnerCategoryResponse>(
-    API_ENDPOINTS.PARTNER_CATEGORY,
-  );
-  return response.data;
-};

@@ -133,6 +133,18 @@ function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetai
 function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], imageUrl: string }) {
   const [currentIndex, setCurrentIndex] = useState(0)
 
+  useEffect(() => {
+    if (sponsors.length === 0) return
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) =>
+        prevIndex === sponsors.length - 1 ? 0 : prevIndex + 1
+      )
+    }, 5000) // Auto-rotate every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [sponsors.length])
+
   if (sponsors.length === 0) {
     return (
       <div className="bg-gray-50 rounded-lg p-8">
@@ -143,51 +155,55 @@ function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], image
     )
   }
 
-  const goToPrevious = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? sponsors.length - 1 : prevIndex - 1
-    )
-  }
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === sponsors.length - 1 ? 0 : prevIndex + 1
-    )
-  }
-
   return (
-    <div className="relative bg-gray-50 rounded-lg p-8">
+    <div className="relative bg-gray-50 rounded-lg p-8 overflow-hidden">
+      {/* Carousel Container */}
       <div className="flex items-center justify-center min-h-[300px]">
-        {sponsors[currentIndex].image && (
-          <img
-            src={`${imageUrl}${sponsors[currentIndex].image}`}
-            alt={sponsors[currentIndex].name}
-            className="max-h-[300px] max-w-full object-contain"
-          />
-        )}
+        <div className="w-full flex transition-all duration-500 ease-in-out"
+          style={{
+            transform: `translateX(-${currentIndex * 100}%)`,
+          }}
+        >
+          {sponsors.map((sponsor, index) => (
+            <div
+              key={sponsor.id}
+              className="w-full flex-shrink-0 flex items-center justify-center"
+            >
+              {sponsor.image && (
+                <img
+                  src={`${imageUrl}${sponsor.image}`}
+                  alt={sponsor.name}
+                  className="max-h-[300px] max-w-full object-contain"
+                />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* Carousel Indicators */}
       {sponsors.length > 1 && (
-        <div className="flex justify-between items-center mt-6">
-          <button
-            onClick={goToPrevious}
-            className="bg-brand-primary text-white p-2 rounded hover:bg-opacity-90 transition"
-          >
-            ←
-          </button>
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              {currentIndex + 1} / {sponsors.length} - {sponsors[currentIndex].name}
-            </p>
-          </div>
-          <button
-            onClick={goToNext}
-            className="bg-brand-primary text-white p-2 rounded hover:bg-opacity-90 transition"
-          >
-            →
-          </button>
+        <div className="flex justify-center gap-2 mt-6">
+          {sponsors.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentIndex
+                  ? 'bg-brand-primary w-6'
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+            />
+          ))}
         </div>
       )}
+
+      {/* Sponsor Name */}
+      <div className="text-center mt-4">
+        <p className="text-sm text-gray-600">
+          {sponsors[currentIndex].name}
+        </p>
+      </div>
     </div>
   )
 }
@@ -378,7 +394,7 @@ export default function MerchantPage() {
                         <h4 className="font-sans font-semibold text-brand-primary">
                           {merchant.name}
                         </h4>
-                        <p className="text-sm text-gray-600">{merchant.notes || merchant.address}</p>
+                        <p className="text-sm text-gray-600">{merchant.address}</p>
                         <div className="flex gap-2 mt-2">
                           <div className="text-xs bg-brand-primary text-white px-2 py-1 rounded">
                             {merchant.category}
