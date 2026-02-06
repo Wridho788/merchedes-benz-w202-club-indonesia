@@ -1,53 +1,274 @@
-import type { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
-  description: 'Daftar merchant dan sponsor resmi W202 Club of Indonesia. Temukan bengkel, towing, detailing, dan partner terpercaya untuk Mercedes-Benz W202 Anda.',
-  keywords: ['Merchant MBW202CI', 'Sponsor W202 Club', 'Bengkel Mercedes W202', 'Partner MBW202CI', 'Towing Mercedes', 'Detailing Mercedes Indonesia'],
-  openGraph: {
-    title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
-    description: 'Daftar merchant dan sponsor resmi W202 Club of Indonesia. Temukan bengkel, towing, detailing, dan partner terpercaya.',
-    url: 'https://mbw202club.id/merchant',
-    siteName: 'Mercedes Benz W202 Club Indonesia',
-    images: [{
-      url: '/hero-1.jpg',
-      width: 1200,
-      height: 630,
-      alt: 'Merchant & Sponsor Mercedes Benz W202 Club Indonesia',
-    }],
-    locale: 'id_ID',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
-    description: 'Daftar merchant dan sponsor resmi W202 Club of Indonesia',
-    images: ['/hero-1.jpg'],
-  },
+import { useState, useEffect } from 'react'
+import type { Metadata } from 'next'
+import { usePartner, usePartnerSponsorship, usePartnerById, usePartnerCities, usePartnerCategories } from '@/lib/hooks/usePartner'
+import type { PartnerItem, PartnerPayload } from '@/lib/api/client'
+
+// This would be in a layout file for SSR metadata, but for now we'll keep it client-side
+// export const metadata: Metadata = {
+//   title: 'Merchant & Sponsor MBW202CI | Partner Resmi Mercedes Benz W202 Club Indonesia',
+//   ...
+// }
+
+interface MerchantFilter {
+  category: string
+  city: string
 }
 
-const MERCHANTS = [
-  {
-    id: 1,
-    name: "Djak Towing",
-    description: "Djakarta Towing Service 24hour Jl Tanjung Barat Raya No 148b, Jakarta, Indonesia 16425 ☎️ +62217890000",
-    category: "Towing"
-  },
-  {
-    id: 2,
-    name: "A5 Garage",
-    description: "Service Engine - Overhaul - Tuneup - Ganti Oli - Kaki-Kaki - Engine Scan, etc Jl Rawadolar No.78, Bekasi ☎️ +62 855-8000-800 ☎️ +62 818-834-571",
-    category: "Bengkel"
-  },
-  {
-    id: 3,
-    name: "Otogears",
-    description: "Premium Wash / Coating / PPF / PDR Jl. Bintaro Utama 3A Blk. DD1 No.71, Bintaro, Pd. Karya, Kec. Pd. Aren, Kota Tangerang Selatan, Banten 15225",
-    category: "Premium Wash Detailing Coating"
+interface PartnerDetailModalProps {
+  partner: PartnerItem | null
+  isOpen: boolean
+  onClose: () => void
+  imageUrl: string
+}
+
+// Partner Detail Modal Component
+function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetailModalProps) {
+  if (!isOpen || !partner) return null
+
+  // Parse coordinates
+  const coords = partner.coordinate.split(',').map(c => parseFloat(c.trim()))
+  const latitude = coords[0]
+  const longitude = coords[1]
+  const mapEmbedUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.3!2d${longitude}!3d${latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2z${latitude},${longitude}!5e0!3m2!1sen!2sid!4v`
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-brand-primary">{partner.name}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="p-6">
+          {/* Partner Image */}
+          {partner.image && (
+            <div className="mb-6">
+              <img
+                src={`${imageUrl}${partner.image}`}
+                alt={partner.name}
+                className="w-full h-64 object-cover rounded-lg"
+              />
+            </div>
+          )}
+
+          {/* Partner Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <h3 className="font-semibold text-gray-700 mb-2">Kategori</h3>
+              <p className="text-gray-600">{partner.category}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-700 mb-2">Kota</h3>
+              <p className="text-gray-600">{partner.city_name}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-700 mb-2">Kontak Person</h3>
+              <p className="text-gray-600">{partner.cp}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-700 mb-2">Telepon 1</h3>
+              <p className="text-gray-600">{partner.phone1}</p>
+            </div>
+            {partner.phone2 && partner.phone2 !== '0' && (
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Telepon 2</h3>
+                <p className="text-gray-600">{partner.phone2}</p>
+              </div>
+            )}
+            <div>
+              <h3 className="font-semibold text-gray-700 mb-2">Email</h3>
+              <p className="text-gray-600 break-all">{partner.email}</p>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-700 mb-2">Alamat</h3>
+            <p className="text-gray-600">{partner.address}</p>
+          </div>
+
+          {partner.website && partner.website !== '-' && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-700 mb-2">Website</h3>
+              <a href={partner.website} target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:underline">
+                {partner.website}
+              </a>
+            </div>
+          )}
+
+          {partner.notes && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-700 mb-2">Catatan</h3>
+              <p className="text-gray-600">{partner.notes}</p>
+            </div>
+          )}
+
+          {/* Map */}
+          {partner.coordinate !== '0' && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-700 mb-2">Lokasi</h3>
+              <iframe
+                width="100%"
+                height="400"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={mapEmbedUrl}
+              ></iframe>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Sponsors Slider Component
+function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], imageUrl: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  if (sponsors.length === 0) {
+    return (
+      <div className="bg-gray-50 rounded-lg p-8">
+        <div className="text-center py-8">
+          <p className="text-gray-500">Tidak ada sponsor yang tersedia saat ini.</p>
+        </div>
+      </div>
+    )
   }
-]
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? sponsors.length - 1 : prevIndex - 1
+    )
+  }
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === sponsors.length - 1 ? 0 : prevIndex + 1
+    )
+  }
+
+  return (
+    <div className="relative bg-gray-50 rounded-lg p-8">
+      <div className="flex items-center justify-center min-h-[300px]">
+        {sponsors[currentIndex].image && (
+          <img
+            src={`${imageUrl}${sponsors[currentIndex].image}`}
+            alt={sponsors[currentIndex].name}
+            className="max-h-[300px] max-w-full object-contain"
+          />
+        )}
+      </div>
+
+      {sponsors.length > 1 && (
+        <div className="flex justify-between items-center mt-6">
+          <button
+            onClick={goToPrevious}
+            className="bg-brand-primary text-white p-2 rounded hover:bg-opacity-90 transition"
+          >
+            ←
+          </button>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              {currentIndex + 1} / {sponsors.length} - {sponsors[currentIndex].name}
+            </p>
+          </div>
+          <button
+            onClick={goToNext}
+            className="bg-brand-primary text-white p-2 rounded hover:bg-opacity-90 transition"
+          >
+            →
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function MerchantPage() {
+  // Merchants State
+  const [merchantFilter, setMerchantFilter] = useState<MerchantFilter>({
+    category: '',
+    city: '',
+  })
+  const [merchantPayload, setMerchantPayload] = useState<PartnerPayload>({
+    limit: 100,
+    offset: 0,
+    category: '',
+    city: '',
+  })
+  const [selectedPartner, setSelectedPartner] = useState<PartnerItem | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Sponsors State
+  const [sponsorFilter, setSponsorFilter] = useState<MerchantFilter>({
+    category: '',
+    city: '',
+  })
+  const [sponsorPayload, setSponsorPayload] = useState<PartnerPayload>({
+    limit: 100,
+    offset: 0,
+    category: '',
+    city: '',
+  })
+
+  // Hooks
+  const { data: merchantData, isLoading: merchantLoading } = usePartner(merchantPayload)
+  const { data: sponsorData, isLoading: sponsorLoading } = usePartnerSponsorship(sponsorPayload)
+  const { data: citiesData } = usePartnerCities()
+  const { data: categoriesData } = usePartnerCategories()
+  const { data: partnerDetailData } = usePartnerById(selectedPartner?.id || '')
+
+  const merchants = merchantData?.content?.result || []
+  const merchants_image_url = merchantData?.content?.image_url || ''
+  const sponsors = sponsorData?.content?.result || []
+  const sponsors_image_url = sponsorData?.content?.image_url || ''
+  const cities = citiesData?.content?.result || []
+  const categories = categoriesData?.content?.result || []
+
+  const handleMerchantFilterChange = (key: keyof MerchantFilter, value: string) => {
+    setMerchantFilter(prev => ({ ...prev, [key]: value }))
+  }
+
+  const handleMerchantApplyFilter = () => {
+    setMerchantPayload({
+      limit: 100,
+      offset: 0,
+      category: merchantFilter.category,
+      city: merchantFilter.city,
+    })
+  }
+
+  const handleSponsorFilterChange = (key: keyof MerchantFilter, value: string) => {
+    setSponsorFilter(prev => ({ ...prev, [key]: value }))
+  }
+
+  const handleSponsorApplyFilter = () => {
+    setSponsorPayload({
+      limit: 100,
+      offset: 0,
+      category: sponsorFilter.category,
+      city: sponsorFilter.city,
+    })
+  }
+
+  const handlePartnerClick = (partner: PartnerItem) => {
+    setSelectedPartner(partner)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setTimeout(() => setSelectedPartner(null), 300)
+  }
+
   return (
     <div className="page-wrapper">
       <section className="py-20 bg-white">
@@ -70,45 +291,107 @@ export default function MerchantPage() {
               <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
                 Official Merchants
               </h3>
-              <div className="space-y-5">
-                {MERCHANTS.map((merchant) => (
-                  <div
-                    key={merchant.id}
-                    className="bg-gray-50 rounded-lg p-4 flex items-center transition duration-300 hover:shadow-md"
-                  >
-                    <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg flex items-center justify-center p-2">
-                      <div className="w-16 h-16 bg-brand-primary rounded-full flex items-center justify-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-white text-xl"
-                        >
-                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                          <circle cx="12" cy="12" r="4"></circle>
-                        </svg>
+
+              {/* Merchant Filters */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kategori
+                    </label>
+                    <select
+                      value={merchantFilter.category}
+                      onChange={(e) => handleMerchantFilterChange('category', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                    >
+                      <option value="">Semua Kategori</option>
+                      {categories.map((cat) => (
+                        <option key={cat.category} value={cat.category}>
+                          {cat.category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kota
+                    </label>
+                    <select
+                      value={merchantFilter.city}
+                      onChange={(e) => handleMerchantFilterChange('city', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                    >
+                      <option value="">Semua Kota</option>
+                      {cities.map((city) => (
+                        <option key={city.city_name} value={city.city_name}>
+                          {city.city_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <button
+                  onClick={handleMerchantApplyFilter}
+                  className="w-full bg-brand-primary text-white py-2 rounded-lg font-medium hover:bg-opacity-90 transition"
+                >
+                  Filter
+                </button>
+              </div>
+
+              {/* Merchants List */}
+              {merchantLoading ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Memuat merchant...</p>
+                </div>
+              ) : merchants.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Tidak ada merchant yang ditemukan.</p>
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  {merchants.map((merchant) => (
+                    <div
+                      key={merchant.id}
+                      onClick={() => handlePartnerClick(merchant)}
+                      className="bg-gray-50 rounded-lg p-4 flex items-center transition duration-300 hover:shadow-md cursor-pointer"
+                    >
+                      <div className="w-20 h-20 flex-shrink-0 bg-white rounded-lg flex items-center justify-center p-2">
+                        <div className="w-16 h-16 bg-brand-primary rounded-full flex items-center justify-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-white text-xl"
+                          >
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <circle cx="12" cy="12" r="4"></circle>
+                          </svg>
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-4 flex-grow">
-                      <h4 className="font-sans font-semibold text-brand-primary">
-                        {merchant.name}
-                      </h4>
-                      <p className="text-sm text-gray-600">{merchant.description}</p>
-                      <div className="flex mt-2">
-                        <div className="text-xs bg-brand-primary text-white px-2 py-1 rounded">
-                          {merchant.category}
+                      <div className="ml-4 flex-grow">
+                        <h4 className="font-sans font-semibold text-brand-primary">
+                          {merchant.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">{merchant.notes || merchant.address}</p>
+                        <div className="flex gap-2 mt-2">
+                          <div className="text-xs bg-brand-primary text-white px-2 py-1 rounded">
+                            {merchant.category}
+                          </div>
+                          <div className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded">
+                            {merchant.city_name}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Official Sponsors */}
@@ -116,13 +399,63 @@ export default function MerchantPage() {
               <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
                 Official Sponsors
               </h3>
-              <div className="bg-gray-50 rounded-lg p-8">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="col-span-2 text-center py-8">
-                    <p className="text-gray-500">No sponsors found.</p>
+
+              {/* Sponsor Filters */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kategori
+                    </label>
+                    <select
+                      value={sponsorFilter.category}
+                      onChange={(e) => handleSponsorFilterChange('category', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                    >
+                      <option value="">Semua Kategori</option>
+                      {categories.map((cat) => (
+                        <option key={cat.category} value={cat.category}>
+                          {cat.category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kota
+                    </label>
+                    <select
+                      value={sponsorFilter.city}
+                      onChange={(e) => handleSponsorFilterChange('city', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                    >
+                      <option value="">Semua Kota</option>
+                      {cities.map((city) => (
+                        <option key={city.city_name} value={city.city_name}>
+                          {city.city_name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
+                <button
+                  onClick={handleSponsorApplyFilter}
+                  className="w-full bg-brand-accent text-white py-2 rounded-lg font-medium hover:bg-opacity-90 transition"
+                >
+                  Filter
+                </button>
               </div>
+
+              {/* Sponsors Slider */}
+              {sponsorLoading ? (
+                <div className="bg-gray-50 rounded-lg p-8">
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Memuat sponsor...</p>
+                  </div>
+                </div>
+              ) : (
+                <SponsorsSlider sponsors={sponsors} imageUrl={sponsors_image_url} />
+              )}
 
               {/* CTA Box */}
               <div className="mt-8 bg-brand-accent bg-opacity-10 rounded-lg p-6 border border-brand-accent border-opacity-30">
@@ -136,6 +469,222 @@ export default function MerchantPage() {
                 <button className="bg-brand-accent text-white px-6 py-2 rounded font-medium hover:bg-opacity-90 transition">
                   Hubungi Kami
                 </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Partner Detail Modal */}
+          <PartnerDetailModal
+            partner={selectedPartner}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            imageUrl={merchants_image_url}
+          />
+
+          {/* Program Partner Section */}
+          <div className="bg-gray-50 rounded-lg p-8 shadow-lg">
+            <div className="text-center mb-8">
+              <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-2">
+                Program Partner W202 Club Indonesia
+              </h3>
+              <p className="text-gray-600">
+                Bergabunglah dengan Program Partner W202 Club Indonesia dan dapatkan
+                manfaat khusus
+              </p>
+            </div>
+
+            {/* Program Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Merchant Program */}
+              <div className="rounded-lg border bg-white shadow-sm">
+                <div className="p-6 bg-brand-primary text-white">
+                  <div className="text-2xl font-semibold">Program Merchant</div>
+                  <div className="text-sm text-gray-200">
+                    Untuk penyedia produk dan jasa otomotif
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-start mb-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-brand-accent mt-1 mr-3 flex-shrink-0"
+                    >
+                      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                      <path d="M3 6h18"></path>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <div>
+                      <h4 className="font-sans font-medium text-brand-primary">
+                        Keuntungan Menjadi Merchant
+                      </h4>
+                      <ul className="text-sm space-y-2 mt-2">
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Exposure ke seluruh anggota W202 Club Indonesia</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Listing di website dan media sosial klub</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Kesempatan promosi di event klub</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Prioritas kerja sama untuk event klub</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="flex items-start mb-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-brand-accent mt-1 mr-3 flex-shrink-0"
+                    >
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                      <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                    <div>
+                      <h4 className="font-sans font-medium text-brand-primary">
+                        Kategori Merchant
+                      </h4>
+                      <p className="text-sm mt-1">
+                        Bengkel, supplier part, detailing, aksesoris, apparel, jasa
+                        perawatan, dan lainnya
+                      </p>
+                    </div>
+                  </div>
+                  <button className="w-full py-2 bg-brand-primary text-white rounded font-medium hover:bg-opacity-90 transition">
+                    Menjadi Merchant Partner
+                  </button>
+                </div>
+              </div>
+
+              {/* Sponsor Program */}
+              <div className="rounded-lg border bg-white shadow-sm">
+                <div className="p-6 bg-brand-accent text-white">
+                  <div className="text-2xl font-semibold">Program Sponsor</div>
+                  <div className="text-sm text-gray-100">Untuk brand dan perusahaan</div>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-start mb-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-brand-primary mt-1 mr-3 flex-shrink-0"
+                    >
+                      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                      <path d="M3 6h18"></path>
+                      <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <div>
+                      <h4 className="font-sans font-medium text-brand-primary">
+                        Keuntungan Menjadi Sponsor
+                      </h4>
+                      <ul className="text-sm space-y-2 mt-2">
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Branding di semua materi publikasi klub</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Booth prioritas di setiap event klub</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Akses eksklusif ke database anggota</span>
+                        </li>
+                        <li className="flex items-center">
+                          <span className="text-brand-accent mr-2">•</span>
+                          <span>Co-branding untuk merchandise klub</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="flex items-start mb-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-brand-primary mt-1 mr-3 flex-shrink-0"
+                    >
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                      <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                    <div>
+                      <h4 className="font-sans font-medium text-brand-primary">
+                        Paket Sponsorship
+                      </h4>
+                      <p className="text-sm mt-1">
+                        Tersedia paket Platinum, Gold, dan Silver dengan berbagai
+                        benefit sesuai kebutuhan
+                      </p>
+                    </div>
+                  </div>
+                  <button className="w-full py-2 bg-brand-accent text-white rounded font-medium hover:bg-opacity-90 transition">
+                    Menjadi Sponsor Partner
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Section */}
+            <div className="mt-10 text-center">
+              <h4 className="font-sans font-semibold text-lg text-brand-primary mb-4">
+                Hubungi Divisi Merchant &amp; Sponsor
+              </h4>
+              <div className="flex justify-center">
+                <a
+                  href="mailto:mbw202clubindonesia@gmail.com"
+                  className="flex items-center text-brand-primary hover:text-brand-accent transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  </svg>
+                  <span>mbw202clubindonesia@gmail.com</span>
+                </a>
               </div>
             </div>
           </div>
