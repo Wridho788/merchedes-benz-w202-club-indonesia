@@ -199,11 +199,11 @@ function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], image
       )}
 
       {/* Sponsor Name */}
-      <div className="text-center mt-4">
+      {/* <div className="text-center mt-4">
         <p className="text-sm text-gray-600">
           {sponsors[currentIndex].name}
         </p>
-      </div>
+      </div> */}
     </div>
   )
 }
@@ -223,11 +223,6 @@ export default function MerchantPage() {
   const [selectedPartner, setSelectedPartner] = useState<PartnerItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Sponsors State
-  const [sponsorFilter, setSponsorFilter] = useState<MerchantFilter>({
-    category: '',
-    city: '',
-  })
   const [sponsorPayload, setSponsorPayload] = useState<PartnerPayload>({
     limit: 100,
     offset: 0,
@@ -261,20 +256,6 @@ export default function MerchantPage() {
       city: merchantFilter.city,
     })
   }
-
-  const handleSponsorFilterChange = (key: keyof MerchantFilter, value: string) => {
-    setSponsorFilter(prev => ({ ...prev, [key]: value }))
-  }
-
-  const handleSponsorApplyFilter = () => {
-    setSponsorPayload({
-      limit: 100,
-      offset: 0,
-      category: sponsorFilter.category,
-      city: sponsorFilter.city,
-    })
-  }
-
   const handlePartnerClick = (partner: PartnerItem) => {
     setSelectedPartner(partner)
     setIsModalOpen(true)
@@ -415,52 +396,6 @@ export default function MerchantPage() {
               <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
                 Official Sponsors
               </h3>
-
-              {/* Sponsor Filters */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kategori
-                    </label>
-                    <select
-                      value={sponsorFilter.category}
-                      onChange={(e) => handleSponsorFilterChange('category', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                    >
-                      <option value="">Semua Kategori</option>
-                      {categories.map((cat) => (
-                        <option key={cat.category} value={cat.category}>
-                          {cat.category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kota
-                    </label>
-                    <select
-                      value={sponsorFilter.city}
-                      onChange={(e) => handleSponsorFilterChange('city', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                    >
-                      <option value="">Semua Kota</option>
-                      {cities.map((city) => (
-                        <option key={city.city_name} value={city.city_name}>
-                          {city.city_name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <button
-                  onClick={handleSponsorApplyFilter}
-                  className="w-full bg-brand-accent text-white py-2 rounded-lg font-medium hover:bg-opacity-90 transition"
-                >
-                  Filter
-                </button>
-              </div>
 
               {/* Sponsors Slider */}
               {sponsorLoading ? (
