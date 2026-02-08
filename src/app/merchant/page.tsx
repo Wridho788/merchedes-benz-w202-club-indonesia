@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Metadata } from 'next'
 import { usePartner, usePartnerSponsorship, usePartnerById, usePartnerCities, usePartnerCategories } from '@/lib/hooks/usePartner'
 import type { PartnerItem, PartnerPayload } from '@/lib/api/client'
@@ -23,6 +23,59 @@ interface PartnerDetailModalProps {
   imageUrl: string
 }
 
+// Map Component with Marker
+function MapComponent({ latitude, longitude, name }: { latitude: number, longitude: number, name: string }) {
+  const mapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!mapRef.current || typeof window === 'undefined') return
+
+    // Load Leaflet dynamically
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'
+    document.head.appendChild(link)
+
+    const script = document.createElement('script')
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'
+    script.onload = () => {
+      const L = (window as any).L
+      if (!L || !mapRef.current) return
+
+      // Initialize map
+      const map = L.map(mapRef.current).setView([latitude, longitude], 15)
+
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+      }).addTo(map)
+
+      // Add marker
+      L.marker([latitude, longitude], {
+        icon: L.icon({
+          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+        }),
+      })
+        .addTo(map)
+        .bindPopup(`${name.toLocaleUpperCase()}`)
+        .openPopup()
+    }
+    document.body.appendChild(script)
+
+    return () => {
+      script.remove()
+    }
+  }, [latitude, longitude])
+
+  return <div ref={mapRef} style={{ width: '100%', height: '400px', borderRadius: '0.5rem' }} />
+}
+
 // Partner Detail Modal Component
 function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetailModalProps) {
   if (!isOpen || !partner) return null
@@ -31,7 +84,6 @@ function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetai
   const coords = partner.coordinate.split(',').map(c => parseFloat(c.trim()))
   const latitude = coords[0]
   const longitude = coords[1]
-  const mapEmbedUrl = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.3!2d${longitude}!3d${latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2z${latitude},${longitude}!5e0!3m2!1sen!2sid!4v`
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -113,14 +165,7 @@ function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetai
           {partner.coordinate !== '0' && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-700 mb-2">Lokasi</h3>
-              <iframe
-                width="100%"
-                height="400"
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                src={mapEmbedUrl}
-              ></iframe>
+              <MapComponent latitude={latitude} longitude={longitude} name={partner.name} />
             </div>
           )}
         </div>
