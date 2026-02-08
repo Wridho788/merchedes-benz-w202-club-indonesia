@@ -37,7 +37,7 @@ function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetai
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-brand-primary">{partner.name}</h2>
+          <h2 className="text-2xl font-bold text-brand-primary">{partner.name.toUpperCase()}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -62,15 +62,15 @@ function PartnerDetailModal({ partner, isOpen, onClose, imageUrl }: PartnerDetai
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <h3 className="font-semibold text-gray-700 mb-2">Kategori</h3>
-              <p className="text-gray-600">{partner.category}</p>
+              <p className="text-gray-600">{partner.category.toUpperCase()}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-700 mb-2">Kota</h3>
-              <p className="text-gray-600">{partner.city_name}</p>
+              <p className="text-gray-600">{partner.city_name.toUpperCase()}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-700 mb-2">Kontak Person</h3>
-              <p className="text-gray-600">{partner.cp}</p>
+              <p className="text-gray-600">{partner.cp.toUpperCase()}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-700 mb-2">Telepon 1</h3>
@@ -156,7 +156,7 @@ function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], image
   }
 
   return (
-    <div className="relative bg-gray-50 rounded-lg p-8 overflow-hidden">
+    <div className="relative bg-gray-50 rounded-lg p-2 overflow-hidden">
       {/* Carousel Container */}
       <div className="flex items-center justify-center min-h-[300px]">
         <div className="w-full flex transition-all duration-500 ease-in-out"
@@ -173,7 +173,7 @@ function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], image
                 <img
                   src={`${imageUrl}${sponsor.image}`}
                   alt={sponsor.name}
-                  className="max-h-[300px] max-w-full object-contain"
+                  className="w-full h-[300px] object-cover mx-2 rounded-sm"
                 />
               )}
             </div>
@@ -183,7 +183,7 @@ function SponsorsSlider({ sponsors, imageUrl }: { sponsors: PartnerItem[], image
 
       {/* Carousel Indicators */}
       {sponsors.length > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
+        <div className="flex justify-center gap-2 mt-2">
           {sponsors.map((_, index) => (
             <button
               key={index}
@@ -235,7 +235,6 @@ export default function MerchantPage() {
   const { data: sponsorData, isLoading: sponsorLoading } = usePartnerSponsorship(sponsorPayload)
   const { data: citiesData } = usePartnerCities()
   const { data: categoriesData } = usePartnerCategories()
-  const { data: partnerDetailData } = usePartnerById(selectedPartner?.id || '')
 
   const merchants = merchantData?.content?.result || []
   const merchants_image_url = merchantData?.content?.image_url || ''
@@ -244,18 +243,6 @@ export default function MerchantPage() {
   const cities = citiesData?.content?.result || []
   const categories = categoriesData?.content?.result || []
 
-  const handleMerchantFilterChange = (key: keyof MerchantFilter, value: string) => {
-    setMerchantFilter(prev => ({ ...prev, [key]: value }))
-  }
-
-  const handleMerchantApplyFilter = () => {
-    setMerchantPayload({
-      limit: 100,
-      offset: 0,
-      category: merchantFilter.category,
-      city: merchantFilter.city,
-    })
-  }
   const handlePartnerClick = (partner: PartnerItem) => {
     setSelectedPartner(partner)
     setIsModalOpen(true)
@@ -285,54 +272,66 @@ export default function MerchantPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
             {/* Official Merchants */}
             <div>
-              <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6">
+              <h3 className="font-sans font-semibold text-2xl text-brand-primary mb-6 uppercase">
                 Official Merchants
               </h3>
 
               {/* Merchant Filters */}
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kategori
+                      KATEGORI
                     </label>
                     <select
                       value={merchantFilter.category}
-                      onChange={(e) => handleMerchantFilterChange('category', e.target.value)}
+                      onChange={(e) => {
+                        const newFilter = { ...merchantFilter, category: e.target.value }
+                        setMerchantFilter(newFilter)
+                        setMerchantPayload({
+                          limit: 100,
+                          offset: 0,
+                          category: e.target.value,
+                          city: merchantFilter.city,
+                        })
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
                     >
                       <option value="">Semua Kategori</option>
                       {categories.map((cat) => (
                         <option key={cat.category} value={cat.category}>
-                          {cat.category}
+                          {cat.category.toUpperCase()}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kota
+                      KOTA
                     </label>
                     <select
                       value={merchantFilter.city}
-                      onChange={(e) => handleMerchantFilterChange('city', e.target.value)}
+                      onChange={(e) => {
+                        const newFilter = { ...merchantFilter, city: e.target.value }
+                        setMerchantFilter(newFilter)
+                        setMerchantPayload({
+                          limit: 100,
+                          offset: 0,
+                          category: merchantFilter.category,
+                          city: e.target.value,
+                        })
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary"
                     >
                       <option value="">Semua Kota</option>
                       {cities.map((city) => (
                         <option key={city.city_name} value={city.city_name}>
-                          {city.city_name}
+                          {city.city_name.toUpperCase()}
                         </option>
                       ))}
                     </select>
                   </div>
                 </div>
-                <button
-                  onClick={handleMerchantApplyFilter}
-                  className="w-full bg-brand-primary text-white py-2 rounded-lg font-medium hover:bg-opacity-90 transition"
-                >
-                  Filter
-                </button>
               </div>
 
               {/* Merchants List */}
@@ -373,15 +372,15 @@ export default function MerchantPage() {
                       </div>
                       <div className="ml-4 flex-grow">
                         <h4 className="font-sans font-semibold text-brand-primary">
-                          {merchant.name}
+                          {merchant.name.toUpperCase()}
                         </h4>
                         <p className="text-sm text-gray-600">{merchant.address}</p>
                         <div className="flex gap-2 mt-2">
-                          <div className="text-xs bg-brand-primary text-white px-2 py-1 rounded">
+                          <div className="text-xs bg-brand-primary text-white px-2 py-1 rounded uppercase">
                             {merchant.category}
                           </div>
                           <div className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded">
-                            {merchant.city_name}
+                            {merchant.city_name.toUpperCase()}
                           </div>
                         </div>
                       </div>
