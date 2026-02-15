@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { usePressConference, useMediaCoverage } from '@/lib/hooks/usePressConference'
 import type { PressRelase } from '@/lib/api/client'
 
@@ -20,6 +20,53 @@ const MEDIA_COVERAGE_PAYLOAD = {
   offset: 0,
   orderby: '',
   order: 'asc' as const,
+}
+
+// Month mapping for date parsing
+const MONTHS: { [key: string]: number } = {
+  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+}
+
+// Parse date string "03 Nov 2025" to Date object
+const parseDate = (dateStr: string): Date => {
+  try {
+    const match = dateStr.match(/(\d{2})\s+(\w+)\s+(\d{4})/)
+    if (!match) return new Date(0)
+    const [, day, month, year] = match
+    const monthIndex = MONTHS[month]
+    if (monthIndex === undefined) return new Date(0)
+    return new Date(parseInt(year), monthIndex, parseInt(day))
+  } catch {
+    return new Date(0)
+  }
+}
+
+// Validate and sanitize image URL
+const getImageUrl = (imageUrl?: string): string => {
+  if (!imageUrl || imageUrl.trim() === '' || imageUrl.endsWith('/')) {
+    return '/images/press-default.jpg'
+  }
+  return imageUrl
+}
+
+// Validate URL format
+const isValidUrl = (url: string | null | undefined): boolean => {
+  if (!url) return false
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
+// Normalize category display
+const normalizeCategory = (category: string): string => {
+  if (!category) return 'Uncategorized'
+  if (category.toLowerCase().includes('press')) return 'Press Release'
+  if (category.toLowerCase().includes('media') || category.toLowerCase().includes('coverage')) return 'Media Coverage'
+  return category
 }
 
 export default function PressPage() {
@@ -146,6 +193,7 @@ export default function PressPage() {
     setIsInitialLoading(true)
     setError(null)
     setIsLoadingMore(false)
+    setSearchQuery('') // Reset search query on filter change
     
     if (selectedFilter === 'press-release') {
       setPressReleaseOffset(0)
@@ -171,43 +219,43 @@ export default function PressPage() {
       setPressReleaseData([])
       setMediaCoverageData([])
     }
+    
+    // Scroll to top
+    window.scrollTo(0, 0)
   }, [selectedFilter])
 
-  // Infinite scroll intersection observer
+  // Infinite scroll intersection observer - memoized
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore) {
-          let shouldLoadMore = false
-          
-          if (selectedFilter === 'press-release' && hasMorePressRelease) {
-            shouldLoadMore = true
-            setPressReleaseOffset((prev) => prev + 10)
-          } else if (selectedFilter === 'media-coverage' && hasMoreMediaCoverage) {
-            shouldLoadMore = true
-            setMediaCoverageOffset((prev) => prev + 10)
-          } else if (selectedFilter === 'all' && (hasMoreAllPress || hasMoreAllMedia)) {
-            shouldLoadMore = true
-            // Increment both offsets only if they still have more data
-            if (hasMoreAllPress) {
-              setAllPressOffset((prev) => prev + 10)
-            }
-            if (hasMoreAllMedia) {
-              setAllMediaOffset((prev) => prev + 10)
-            }
-          }
-          
-          if (shouldLoadMore) {
-            setIsLoadingMore(true)
-          }
-        }
-      },
-      { threshold: 0.1 },
-    )
+    if (!observerTarget.current) return
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current)
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      if (!entries[0].isIntersecting || isLoadingMore) return
+
+      let shouldLoadMore = false
+      
+      if (selectedFilter === 'press-release' && hasMorePressRelease) {
+        shouldLoadMore = true
+        setPressReleaseOffset((prev) => prev + 10)
+      } else if (selectedFilter === 'media-coverage' && hasMoreMediaCoverage) {
+        shouldLoadMore = true
+        setMediaCoverageOffset((prev) => prev + 10)
+      } else if (selectedFilter === 'all' && (hasMoreAllPress || hasMoreAllMedia)) {
+        shouldLoadMore = true
+        if (hasMoreAllPress) {
+          setAllPressOffset((prev) => prev + 10)
+        }
+        if (hasMoreAllMedia) {
+          setAllMediaOffset((prev) => prev + 10)
+        }
+      }
+      
+      if (shouldLoadMore) {
+        setIsLoadingMore(true)
+      }
     }
+
+    const observer = new IntersectionObserver(handleIntersection, { threshold: 0.1 })
+    observer.observe(observerTarget.current)
 
     return () => {
       if (observerTarget.current) {
@@ -216,31 +264,34 @@ export default function PressPage() {
     }
   }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, hasMoreAllPress, hasMoreAllMedia, isLoadingMore])
 
-  // Filter results based on search
-  const getDisplayData = () => {
+  // Filter results based on search with memoization
+  const getDisplayData = useCallback(() => {
     if (selectedFilter === 'media-coverage') {
       return mediaCoverageData
     } else if (selectedFilter === 'all') {
       // Combine press and media data, then sort by date (newest first)
       const combined = [...allPressData, ...allMediaData]
       return combined.sort((a, b) => {
-        const dateA = new Date(a.date.replace(/(\d{2}) (\w+) (\d{4})/, '$2 $1, $3')).getTime()
-        const dateB = new Date(b.date.replace(/(\d{2}) (\w+) (\d{4})/, '$2 $1, $3')).getTime()
-        return dateB - dateA // Newest first
+        const dateA = parseDate(a.date)
+        const dateB = parseDate(b.date)
+        return dateB.getTime() - dateA.getTime() // Newest first
       })
     }
     return pressReleaseData
-  }
+  }, [selectedFilter, pressReleaseData, mediaCoverageData, allPressData, allMediaData])
 
-  const displayData = getDisplayData()
+  const displayData = useMemo(() => getDisplayData(), [getDisplayData])
 
-  const filteredPress = displayData.filter((item) => {
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.shortdesc?.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
-  })
+  const filteredPress = useMemo(() => {
+    return displayData.filter((item) => {
+      if (!searchQuery.trim()) return true
+      const query = searchQuery.toLowerCase()
+      const title = item.title?.toLowerCase() || ''
+      const text = item.text?.toLowerCase() || ''
+      const shortdesc = item.shortdesc?.toLowerCase() || ''
+      return title.includes(query) || text.includes(query) || shortdesc.includes(query)
+    })
+  }, [displayData, searchQuery])
 
   return (
     <div className="page-wrapper">
@@ -264,6 +315,7 @@ export default function PressPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setSelectedFilter('all')}
+                  aria-label="Tampilkan semua press release"
                   className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
                     selectedFilter === 'all'
                       ? 'bg-brand-primary text-white'
@@ -274,6 +326,7 @@ export default function PressPage() {
                 </button>
                 <button
                   onClick={() => setSelectedFilter('press-release')}
+                  aria-label="Tampilkan press release saja"
                   className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
                     selectedFilter === 'press-release'
                       ? 'bg-brand-primary text-white'
@@ -284,6 +337,7 @@ export default function PressPage() {
                 </button>
                 <button
                   onClick={() => setSelectedFilter('media-coverage')}
+                  aria-label="Tampilkan media coverage saja"
                   className={`px-4 py-2 rounded text-sm font-medium transition duration-300 ${
                     selectedFilter === 'media-coverage'
                       ? 'bg-brand-primary text-white'
@@ -296,12 +350,15 @@ export default function PressPage() {
 
               {/* Search Input */}
               <div className="relative w-full md:w-auto md:min-w-[300px]">
+                <label htmlFor="search" className="sr-only">Cari press release</label>
                 <input
+                  id="search"
                   type="text"
                   className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm pl-10 focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   placeholder="Cari press release..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Cari press release dan media coverage"
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -336,39 +393,51 @@ export default function PressPage() {
                 </div>
               ) : filteredPress.length > 0 ? (
                 filteredPress.map((item) => (
-                  <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                     {/* Image */}
                     <div className="h-48 overflow-hidden bg-gray-200">
                       <img
-                        src={item.image || '/images/press-default.jpg'}
+                        src={getImageUrl(item.image)}
                         alt={item.title}
                         className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                        loading="lazy"
                       />
                     </div>
 
                     {/* Content */}
                     <div className="p-6">
                       <div className="inline-block mb-2 text-xs font-medium text-brand-primary bg-gray-50 px-2 py-1 rounded">
-                        {item.category}
+                        {normalizeCategory(item.category)}
                       </div>
-                      <h3 className="font-sans font-semibold text-lg text-brand-primary mb-2">
+                      <h3 className="font-sans font-semibold text-lg text-brand-primary mb-2 line-clamp-2">
                         {item.title}
                       </h3>
                       <p className="text-sm text-gray-600 mb-1">
                         {item.date}
                       </p>
-                      <p className="text-sm mb-4 line-clamp-3">{item.shortdesc || item.text || 'Tidak ada deskripsi'}</p>
-                      {item.link && (
+                      <p className="text-sm mb-4 line-clamp-3 text-gray-700">
+                        {item.shortdesc || item.text || 'Tidak ada deskripsi'}
+                      </p>
+                      {isValidUrl(item.link) ? (
                         <a
-                          href={item.link}
+                          href={item.link!}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block"
+                          aria-label={`Baca artikel: ${item.title}`}
                         >
                           <button className="w-full py-2 border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded text-sm font-medium transition">
                             Baca Artikel
                           </button>
                         </a>
+                      ) : (
+                        <button 
+                          disabled
+                          className="w-full py-2 border border-gray-300 text-gray-400 bg-gray-50 rounded text-sm font-medium cursor-not-allowed"
+                          aria-label="Link tidak tersedia"
+                        >
+                          Baca Artikel
+                        </button>
                       )}
                     </div>
                   </div>
