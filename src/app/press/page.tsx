@@ -95,13 +95,19 @@ export default function PressPage() {
     if (selectedFilter === 'press-release') {
       setPressReleaseOffset(0)
       setMediaCoverageData([])
+      setAllOffset(0)
     } else if (selectedFilter === 'media-coverage') {
       setMediaCoverageOffset(0)
       setPressReleaseData([])
+      setAllOffset(0)
     } else if (selectedFilter === 'all') {
       setAllOffset(0)
       setPressReleaseData([])
+      setMediaCoverageData([])
+      setPressReleaseOffset(0)
+      setMediaCoverageOffset(0)
     }
+    setIsLoadingMore(false)
   }, [selectedFilter])
 
   // Infinite scroll intersection observer
@@ -134,7 +140,16 @@ export default function PressPage() {
   }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, hasMoreAll, isLoadingMore])
 
   // Filter results based on search
-  const filteredPress = pressReleaseData.filter((item) => {
+  const getDisplayData = () => {
+    if (selectedFilter === 'media-coverage') {
+      return mediaCoverageData
+    }
+    return pressReleaseData
+  }
+
+  const displayData = getDisplayData()
+
+  const filteredPress = displayData.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.text.toLowerCase().includes(searchQuery.toLowerCase())
@@ -228,7 +243,7 @@ export default function PressPage() {
                     {/* Image */}
                     <div className="h-48 overflow-hidden">
                       <img
-                        src={item.image || '/images/press-default.jpg'}
+                        src={item.image}
                         alt={item.title}
                         className="w-full h-full object-cover hover:scale-105 transition duration-500"
                       />
@@ -266,7 +281,7 @@ export default function PressPage() {
                   <p className="text-gray-600">
                     {pressReleaseQuery.isLoading || mediaCoverageQuery.isLoading || allPressQuery.isLoading || allMediaQuery.isLoading
                       ? 'Memuat data...'
-                      : 'Tidak ada press release yang ditemukan'}
+                      : 'Tidak ada data yang ditemukan'}
                   </p>
                 </div>
               )}

@@ -418,7 +418,7 @@ export interface PressRelase {
   date: string;
   lang: string;
   created: string;
-  image?: string;
+  image: string;
   publish?: string;
   front: string;
   permalink: string;
