@@ -50,37 +50,41 @@ export default function PressPage() {
   // Handle initial load and filter changes
   useEffect(() => {
     if (selectedFilter === 'press-release' && pressReleaseQuery.data) {
+      const result = Array.isArray(pressReleaseQuery.data.content.result) ? pressReleaseQuery.data.content.result : []
       if (pressReleaseOffset === 0) {
-        setPressReleaseData(pressReleaseQuery.data.content.result)
+        setPressReleaseData(result)
       } else {
-        setPressReleaseData((prev) => [...prev, ...pressReleaseQuery.data.content.result])
+        setPressReleaseData((prev) => [...prev, ...result])
       }
-      setHasMorePressRelease(pressReleaseQuery.data.content.record > pressReleaseData.length)
+      setHasMorePressRelease((pressReleaseQuery.data.content.record || 0) > pressReleaseData.length)
       setIsLoadingMore(false)
     }
   }, [pressReleaseQuery.data, pressReleaseOffset, selectedFilter])
 
   useEffect(() => {
     if (selectedFilter === 'media-coverage' && mediaCoverageQuery.data) {
+      const result = Array.isArray(mediaCoverageQuery.data.content.result) ? mediaCoverageQuery.data.content.result : []
       if (mediaCoverageOffset === 0) {
-        setMediaCoverageData(mediaCoverageQuery.data.content.result)
+        setMediaCoverageData(result)
       } else {
-        setMediaCoverageData((prev) => [...prev, ...mediaCoverageQuery.data.content.result])
+        setMediaCoverageData((prev) => [...prev, ...result])
       }
-      setHasMoreMediaCoverage(mediaCoverageQuery.data.content.record > mediaCoverageData.length)
+      setHasMoreMediaCoverage((mediaCoverageQuery.data.content.record || 0) > mediaCoverageData.length)
       setIsLoadingMore(false)
     }
   }, [mediaCoverageQuery.data, mediaCoverageOffset, selectedFilter])
 
   useEffect(() => {
     if (selectedFilter === 'all' && allPressQuery.data && allMediaQuery.data) {
-      const combinedData = [...allPressQuery.data.content.result, ...allMediaQuery.data.content.result]
+      const pressResult = Array.isArray(allPressQuery.data.content.result) ? allPressQuery.data.content.result : []
+      const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
+      const combinedData = [...pressResult, ...mediaResult]
       if (allOffset === 0) {
         setPressReleaseData(combinedData.slice(0, 10))
       } else {
         setPressReleaseData((prev) => [...prev, ...combinedData.slice(0, 10)])
       }
-      const totalRecords = allPressQuery.data.content.record + allMediaQuery.data.content.record
+      const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
       setHasMoreAll(totalRecords > pressReleaseData.length)
       setIsLoadingMore(false)
     }
