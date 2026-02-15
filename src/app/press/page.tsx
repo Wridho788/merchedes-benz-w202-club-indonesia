@@ -1,65 +1,140 @@
 'use client'
 
-import type { Metadata } from 'next'
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
+import { usePressConference, useMediaCoverage } from '@/lib/hooks/usePressConference'
+import type { PressRelase } from '@/lib/api/client'
 
-const PRESS_RELEASES = [
-  {
-    id: 1,
-    title: 'Mercedes-Benz W202 Gelar Rakernas di Semarang',
-    category: 'Media Coverage',
-    date: '3 November 2025',
-    source: 'Media Source',
-    excerpt: 'Mercedes-Benz W202 Gelar Rakernas di Semarang eKoran Lingkar Edisi 3 November 2025',
-    image: '/images/press-default.jpg',
-    link: 'https://koranlingkar.com/view/2025-11-03'
-  },
-  {
-    id: 2,
-    title: 'Dari mobil klasik hingga persaudaraan, Mercy W202 Club Indonesia Mantapkan langkah menuju dua dekade',
-    category: 'Press Release',
-    date: '1 November 2025',
-    source: 'Media Source',
-    excerpt: 'Mantapkan Langkah Menuju Dua Dekade',
-    image: '/images/press-default.jpg',
-    link: 'https://lingkar.co/dari-mobil-klasik-hingga-persaudaraan-mercy-w202-club-indonesia-mantapkan-langkah-menuju-dua-dekade/'
-  },
-  {
-    id: 3,
-    title: 'Jatim-Bali Benz Meet Up 2025',
-    category: 'Media Coverage',
-    date: '25 Februari 2025',
-    source: 'Media Source',
-    excerpt: 'MBW202CI Surabaya Region berkolaborasi dengan Mercedes-Benz Club Indonesia Regional Jatim-Bali untuk menyelenggarakan acara di Surabaya yang diikuti oleh 121 kendaraan dan 19 klub.',
-    image: 'https://static.wixstatic.com/media/4c022a_0e8184d8e556497f92033da5c8075e28~mv2.jpg/v1/fill/w_740,h_555,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/4c022a_0e8184d8e556497f92033da5c8075e28~mv2.jpg',
-    link: 'https://www.otoplus-online.com/post/jatim-bali-benz-meet-up-2025-diramaikan-121-mercy-berbagai-model-dan-tahun-produksi'
-  },
-  {
-    id: 4,
-    title: 'Ketua Umum IMI Apresiasi Fun Rally Mercedes Benz W202 Club Indonesia',
-    category: 'Media Coverage',
-    date: '23 Juli 2024',
-    source: 'Media Source',
-    excerpt: 'Bambang Soesatyo, Ketua MPR RI ke-16 sekaligus Wakil Ketua Umum Partai Golkar dan Ketua Umum Ikatan Motor Indonesia (IMI), menyampaikan apresiasinya terhadap penyelenggaraan Fun Rally oleh Mercedes Benz W202 Club Indonesia (MBW202CI). Acara ini diadakan dalam rangka merayakan HUT ke-17 MBW202CI, dengan total 21 piala dan 1 piala Best Overall yang dipersembahkan oleh IMI DKI Jakarta.',
-    image: 'https://cdn-1.timesmedia.co.id/images/2024/07/23/IMI-Bambang-Soesatyo.jpg',
-    link: '#'
-  }
-]
+const PRESS_CONFERENCE_PAYLOAD = {
+  chapter: 13,
+  category: 29,
+  limit: 10,
+  offset: 0,
+  orderby: '',
+  order: 'asc' as const,
+}
+
+const MEDIA_COVERAGE_PAYLOAD = {
+  chapter: 13,
+  category: 32,
+  limit: 10,
+  offset: 0,
+  orderby: '',
+  order: 'asc' as const,
+}
 
 export default function PressPage() {
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [pressReleaseData, setPressReleaseData] = useState<PressRelase[]>([])
+  const [mediaCoverageData, setMediaCoverageData] = useState<PressRelase[]>([])
+  const [pressReleaseOffset, setPressReleaseOffset] = useState(0)
+  const [mediaCoverageOffset, setMediaCoverageOffset] = useState(0)
+  const [allOffset, setAllOffset] = useState(0)
+  const [hasMorePressRelease, setHasMorePressRelease] = useState(true)
+  const [hasMoreMediaCoverage, setHasMoreMediaCoverage] = useState(true)
+  const [hasMoreAll, setHasMoreAll] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const observerTarget = useRef<HTMLDivElement>(null)
 
-  const filteredPress = PRESS_RELEASES.filter((item) => {
-    const matchesFilter = selectedFilter === 'all' || 
-      (selectedFilter === 'press-release' && item.category === 'Press Release') ||
-      (selectedFilter === 'media-coverage' && item.category === 'Media Coverage')
-    
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    return matchesFilter && matchesSearch
+  // Fetch data based on filter
+  const pressReleasePayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: pressReleaseOffset }
+  const mediaCoveragePayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: mediaCoverageOffset }
+  const allPressPayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: allOffset }
+  const allMediaPayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: allOffset }
+
+  const pressReleaseQuery = usePressConference(pressReleasePayload)
+  const mediaCoverageQuery = useMediaCoverage(mediaCoveragePayload)
+  const allPressQuery = usePressConference(allPressPayload)
+  const allMediaQuery = useMediaCoverage(allMediaPayload)
+
+  // Handle initial load and filter changes
+  useEffect(() => {
+    if (selectedFilter === 'press-release' && pressReleaseQuery.data) {
+      if (pressReleaseOffset === 0) {
+        setPressReleaseData(pressReleaseQuery.data.content.result)
+      } else {
+        setPressReleaseData((prev) => [...prev, ...pressReleaseQuery.data.content.result])
+      }
+      setHasMorePressRelease(pressReleaseQuery.data.content.record > pressReleaseData.length)
+      setIsLoadingMore(false)
+    }
+  }, [pressReleaseQuery.data, pressReleaseOffset, selectedFilter])
+
+  useEffect(() => {
+    if (selectedFilter === 'media-coverage' && mediaCoverageQuery.data) {
+      if (mediaCoverageOffset === 0) {
+        setMediaCoverageData(mediaCoverageQuery.data.content.result)
+      } else {
+        setMediaCoverageData((prev) => [...prev, ...mediaCoverageQuery.data.content.result])
+      }
+      setHasMoreMediaCoverage(mediaCoverageQuery.data.content.record > mediaCoverageData.length)
+      setIsLoadingMore(false)
+    }
+  }, [mediaCoverageQuery.data, mediaCoverageOffset, selectedFilter])
+
+  useEffect(() => {
+    if (selectedFilter === 'all' && allPressQuery.data && allMediaQuery.data) {
+      const combinedData = [...allPressQuery.data.content.result, ...allMediaQuery.data.content.result]
+      if (allOffset === 0) {
+        setPressReleaseData(combinedData.slice(0, 10))
+      } else {
+        setPressReleaseData((prev) => [...prev, ...combinedData.slice(0, 10)])
+      }
+      const totalRecords = allPressQuery.data.content.record + allMediaQuery.data.content.record
+      setHasMoreAll(totalRecords > pressReleaseData.length)
+      setIsLoadingMore(false)
+    }
+  }, [allPressQuery.data, allMediaQuery.data, allOffset, selectedFilter])
+
+  // Reset data when filter changes
+  useEffect(() => {
+    if (selectedFilter === 'press-release') {
+      setPressReleaseOffset(0)
+      setMediaCoverageData([])
+    } else if (selectedFilter === 'media-coverage') {
+      setMediaCoverageOffset(0)
+      setPressReleaseData([])
+    } else if (selectedFilter === 'all') {
+      setAllOffset(0)
+      setPressReleaseData([])
+    }
+  }, [selectedFilter])
+
+  // Infinite scroll intersection observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore) {
+          setIsLoadingMore(true)
+          if (selectedFilter === 'press-release' && hasMorePressRelease) {
+            setPressReleaseOffset((prev) => prev + 10)
+          } else if (selectedFilter === 'media-coverage' && hasMoreMediaCoverage) {
+            setMediaCoverageOffset((prev) => prev + 10)
+          } else if (selectedFilter === 'all' && hasMoreAll) {
+            setAllOffset((prev) => prev + 10)
+          }
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current)
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current)
+      }
+    }
+  }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, hasMoreAll, isLoadingMore])
+
+  // Filter results based on search
+  const filteredPress = pressReleaseData.filter((item) => {
+    const matchesSearch =
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.text.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesSearch
   })
 
   return (
@@ -143,50 +218,63 @@ export default function PressPage() {
 
             {/* Press Release Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPress.map((item) => (
-                <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                  {/* Image */}
-                  <div className="h-48 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover hover:scale-105 transition duration-500"
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6">
-                    <div className="inline-block mb-2 text-xs font-medium text-brand-primary bg-gray-50 px-2 py-1 rounded">
-                      {item.category}
+              {filteredPress.length > 0 ? (
+                filteredPress.map((item) => (
+                  <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    {/* Image */}
+                    <div className="h-48 overflow-hidden">
+                      <img
+                        src={item.image || '/images/press-default.jpg'}
+                        alt={item.title}
+                        className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                      />
                     </div>
-                    <h3 className="font-sans font-semibold text-lg text-brand-primary mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {item.date} • {item.source}
-                    </p>
-                    <p className="text-sm mb-4 line-clamp-3">{item.excerpt}</p>
-                    {item.link !== '#' && (
-                      <a
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <button className="w-full py-2 border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded text-sm font-medium transition">
-                          Baca Artikel
-                        </button>
-                      </a>
-                    )}
+
+                    {/* Content */}
+                    <div className="p-6">
+                      <div className="inline-block mb-2 text-xs font-medium text-brand-primary bg-gray-50 px-2 py-1 rounded">
+                        {item.category}
+                      </div>
+                      <h3 className="font-sans font-semibold text-lg text-brand-primary mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-1">
+                        {item.date}
+                      </p>
+                      <p className="text-sm mb-4 line-clamp-3">{item.text || item.shortdesc}</p>
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <button className="w-full py-2 border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded text-sm font-medium transition">
+                            Baca Artikel
+                          </button>
+                        </a>
+                      )}
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-gray-600">
+                    {pressReleaseQuery.isLoading || mediaCoverageQuery.isLoading || allPressQuery.isLoading || allMediaQuery.isLoading
+                      ? 'Memuat data...'
+                      : 'Tidak ada press release yang ditemukan'}
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
 
-            {/* Load More Button */}
-            <div className="text-center mt-8">
-              <button className="px-6 py-2 border border-brand-primary text-brand-primary rounded font-medium hover:bg-brand-primary hover:text-white transition">
-                Lihat Semua Press Release
-              </button>
+            {/* Infinite Scroll Observer */}
+            <div ref={observerTarget} className="py-8">
+              {isLoadingMore && (
+                <div className="flex justify-center items-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+                </div>
+              )}
             </div>
           </div>
 

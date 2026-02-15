@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   PARTNER_GET_BY_ID: '/partner/get/',
   PARTNER_CITY: '/partner/city',
   PARTNER_CATEGORY: '/partner/category',
+  GET_PERMALINK: 'article/get_by_permalink/',
 } as const;
 
 // Chapter ID constant
@@ -26,4 +27,5 @@ export const CATEGORIES = {
   CLUB_EVENT: 24,
   PRESS_RELEASE: 29,
   FEATURED_MEMBER: 31,
+  MEDIA_COVERAGE: 32,
 } as const;

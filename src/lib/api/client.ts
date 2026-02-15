@@ -118,7 +118,34 @@ export const fetchPartnerCategories = async (): Promise<PartnerCategoryResponse>
   return response.data;
 };
 
+export const fetchPressConference = async (
+  payload: ArticleIndexPayload,
+): Promise<PressRelaseResponse> => {
+  const response = await apiClient.post<PressRelaseResponse>(
+    API_ENDPOINTS.ARTICLE_INDEX_WEBSITE,
+    payload,
+  );
+  return response.data;
+};
 
+export const fetchMediaCoverage = async (
+  payload: ArticleIndexPayload,
+): Promise<PressRelaseResponse> => {
+  const response = await apiClient.post<PressRelaseResponse>(
+    API_ENDPOINTS.ARTICLE_INDEX_WEBSITE,
+    payload,
+  );
+  return response.data;
+};
+
+export const fetchMediaCoverageById = async (
+  articleId: string,
+): Promise<ArticleResponse> => { 
+  const response = await apiClient.get<ArticleResponse>(
+    `${API_ENDPOINTS.ARTICLE_INDEX_WEBSITE}/${articleId}`,
+  );
+  return response.data;
+};
 // Types
 export interface SliderItem {
   id: string;
@@ -367,4 +394,32 @@ export interface PartnerCityname {
 
 export interface PartnerCategory {
   category: string;
+}
+
+
+export interface PressRelaseResponse {
+  content: {
+    record: number;
+    result: PressRelase[];
+  }
+}
+
+export interface PressRelase {
+  id: string;
+  name: string;
+  category: string;
+  chapter: string;
+  shortdesc: string | null;
+  type: string;
+  islink: boolean;
+  link: string | null;
+  title: string;
+  text: string;
+  date: string;
+  lang: string;
+  created: string;
+  image?: string;
+  publish?: string;
+  front: string;
+  permalink: string;
 }
