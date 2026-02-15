@@ -29,101 +29,125 @@ export default function PressPage() {
   const [mediaCoverageData, setMediaCoverageData] = useState<PressRelase[]>([])
   const [pressReleaseOffset, setPressReleaseOffset] = useState(0)
   const [mediaCoverageOffset, setMediaCoverageOffset] = useState(0)
-  const [allOffset, setAllOffset] = useState(0)
+  const [allPressOffset, setAllPressOffset] = useState(0)
+  const [allMediaOffset, setAllMediaOffset] = useState(0)
   const [hasMorePressRelease, setHasMorePressRelease] = useState(true)
   const [hasMoreMediaCoverage, setHasMoreMediaCoverage] = useState(true)
   const [hasMoreAll, setHasMoreAll] = useState(true)
-  const [allFetchedCount, setAllFetchedCount] = useState(0)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   // Fetch data based on filter
   const pressReleasePayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: pressReleaseOffset }
   const mediaCoveragePayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: mediaCoverageOffset }
-  const allPressPayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: allOffset }
-  const allMediaPayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: allOffset }
+  const allPressPayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: allPressOffset }
+  const allMediaPayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: allMediaOffset }
 
   const pressReleaseQuery = usePressConference(pressReleasePayload)
   const mediaCoverageQuery = useMediaCoverage(mediaCoveragePayload)
   const allPressQuery = usePressConference(allPressPayload)
   const allMediaQuery = useMediaCoverage(allMediaPayload)
 
-  // Handle initial load and filter changes
+  // Handle press-release filter
   useEffect(() => {
     if (selectedFilter === 'press-release' && pressReleaseQuery.data) {
-      const result = Array.isArray(pressReleaseQuery.data.content.result) ? pressReleaseQuery.data.content.result : []
-      if (pressReleaseOffset === 0) {
-        setPressReleaseData(result)
-      } else {
-        setPressReleaseData((prev) => [...prev, ...result])
+      try {
+        const result = Array.isArray(pressReleaseQuery.data.content.result) ? pressReleaseQuery.data.content.result : []
+        if (pressReleaseOffset === 0) {
+          setPressReleaseData(result)
+        } else {
+          setPressReleaseData((prev) => [...prev, ...result])
+        }
+        const totalData = pressReleaseOffset + result.length
+        setHasMorePressRelease((pressReleaseQuery.data.content.record || 0) > totalData)
+        setError(null)
+        setIsInitialLoading(false)
+      } catch (err) {
+        setError('Gagal mengambil data press release')
+        setIsInitialLoading(false)
       }
-      const totalData = pressReleaseOffset + result.length
-      setHasMorePressRelease((pressReleaseQuery.data.content.record || 0) > totalData)
       setIsLoadingMore(false)
     }
   }, [pressReleaseQuery.data, pressReleaseOffset, selectedFilter])
 
+  // Handle media-coverage filter
   useEffect(() => {
     if (selectedFilter === 'media-coverage' && mediaCoverageQuery.data) {
-      const result = Array.isArray(mediaCoverageQuery.data.content.result) ? mediaCoverageQuery.data.content.result : []
-      if (mediaCoverageOffset === 0) {
-        setMediaCoverageData(result)
-      } else {
-        setMediaCoverageData((prev) => [...prev, ...result])
+      try {
+        const result = Array.isArray(mediaCoverageQuery.data.content.result) ? mediaCoverageQuery.data.content.result : []
+        if (mediaCoverageOffset === 0) {
+          setMediaCoverageData(result)
+        } else {
+          setMediaCoverageData((prev) => [...prev, ...result])
+        }
+        const totalData = mediaCoverageOffset + result.length
+        setHasMoreMediaCoverage((mediaCoverageQuery.data.content.record || 0) > totalData)
+        setError(null)
+        setIsInitialLoading(false)
+      } catch (err) {
+        setError('Gagal mengambil data media coverage')
+        setIsInitialLoading(false)
       }
-      const totalData = mediaCoverageOffset + result.length
-      setHasMoreMediaCoverage((mediaCoverageQuery.data.content.record || 0) > totalData)
       setIsLoadingMore(false)
     }
   }, [mediaCoverageQuery.data, mediaCoverageOffset, selectedFilter])
 
+  // Handle all filter - combine from separate offsets
   useEffect(() => {
     if (selectedFilter === 'all' && allPressQuery.data && allMediaQuery.data) {
-      const pressResult = Array.isArray(allPressQuery.data.content.result) ? allPressQuery.data.content.result : []
-      const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
-      const combinedData = [...pressResult, ...mediaResult]
-      
-      if (allOffset === 0) {
-        const sliced = combinedData.slice(0, 10)
-        setPressReleaseData(sliced)
-        setAllFetchedCount(sliced.length)
-      } else {
-        const sliced = combinedData.slice(0, 10)
-        setPressReleaseData((prev) => [...prev, ...sliced])
-        setAllFetchedCount((prev) => prev + sliced.length)
+      try {
+        const pressResult = Array.isArray(allPressQuery.data.content.result) ? allPressQuery.data.content.result : []
+        const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
+        
+        // Don't slice - combine the paginated results directly
+        const combinedData = [...pressResult, ...mediaResult]
+        
+        if (allPressOffset === 0 && allMediaOffset === 0) {
+          setPressReleaseData(combinedData)
+        } else {
+          setPressReleaseData((prev) => [...prev, ...combinedData])
+        }
+        
+        const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
+        const totalFetched = (allPressOffset + pressResult.length) + (allMediaOffset + mediaResult.length)
+        
+        setHasMoreAll(totalRecords > totalFetched)
+        setError(null)
+        setIsInitialLoading(false)
+      } catch (err) {
+        setError('Gagal mengambil data')
+        setIsInitialLoading(false)
       }
-      
-      const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
-      
-      // Calculate total fetched so far
-      const totalFetched = allOffset + combinedData.length
-      setHasMoreAll(totalRecords > totalFetched)
-      
       setIsLoadingMore(false)
     }
-  }, [allPressQuery.data, allMediaQuery.data, allOffset, selectedFilter])
+  }, [allPressQuery.data, allMediaQuery.data, allPressOffset, allMediaOffset, selectedFilter])
 
   // Reset data when filter changes
   useEffect(() => {
+    setIsInitialLoading(true)
+    setError(null)
+    setIsLoadingMore(false)
+    
     if (selectedFilter === 'press-release') {
       setPressReleaseOffset(0)
       setMediaCoverageData([])
-      setAllOffset(0)
-      setAllFetchedCount(0)
+      setAllPressOffset(0)
+      setAllMediaOffset(0)
     } else if (selectedFilter === 'media-coverage') {
       setMediaCoverageOffset(0)
       setPressReleaseData([])
-      setAllOffset(0)
-      setAllFetchedCount(0)
+      setAllPressOffset(0)
+      setAllMediaOffset(0)
     } else if (selectedFilter === 'all') {
-      setAllOffset(0)
+      setAllPressOffset(0)
+      setAllMediaOffset(0)
       setPressReleaseData([])
       setMediaCoverageData([])
       setPressReleaseOffset(0)
       setMediaCoverageOffset(0)
-      setAllFetchedCount(0)
     }
-    setIsLoadingMore(false)
   }, [selectedFilter])
 
   // Infinite scroll intersection observer
@@ -141,7 +165,9 @@ export default function PressPage() {
             setMediaCoverageOffset((prev) => prev + 10)
           } else if (selectedFilter === 'all' && hasMoreAll) {
             shouldLoadMore = true
-            setAllOffset((prev) => prev + 10)
+            // Increment both offsets for "all" filter
+            setAllPressOffset((prev) => prev + 10)
+            setAllMediaOffset((prev) => prev + 10)
           }
           
           if (shouldLoadMore) {
@@ -261,7 +287,18 @@ export default function PressPage() {
 
             {/* Press Release Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredPress.length > 0 ? (
+              {error && (
+                <div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+                  <p className="font-medium">Terjadi kesalahan</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+              
+              {isInitialLoading ? (
+                <div className="col-span-full flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-primary"></div>
+                </div>
+              ) : filteredPress.length > 0 ? (
                 filteredPress.map((item) => (
                   <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                     {/* Image */}
@@ -302,11 +339,7 @@ export default function PressPage() {
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-gray-600">
-                    {pressReleaseQuery.isLoading || mediaCoverageQuery.isLoading || allPressQuery.isLoading || allMediaQuery.isLoading
-                      ? 'Memuat data...'
-                      : 'Tidak ada data yang ditemukan'}
-                  </p>
+                  <p className="text-gray-600">Tidak ada data yang ditemukan</p>
                 </div>
               )}
             </div>
