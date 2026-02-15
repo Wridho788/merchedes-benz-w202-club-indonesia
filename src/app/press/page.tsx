@@ -56,7 +56,8 @@ export default function PressPage() {
       } else {
         setPressReleaseData((prev) => [...prev, ...result])
       }
-      setHasMorePressRelease((pressReleaseQuery.data.content.record || 0) > pressReleaseData.length)
+      const totalData = pressReleaseOffset + result.length
+      setHasMorePressRelease((pressReleaseQuery.data.content.record || 0) > totalData)
       setIsLoadingMore(false)
     }
   }, [pressReleaseQuery.data, pressReleaseOffset, selectedFilter])
@@ -69,7 +70,8 @@ export default function PressPage() {
       } else {
         setMediaCoverageData((prev) => [...prev, ...result])
       }
-      setHasMoreMediaCoverage((mediaCoverageQuery.data.content.record || 0) > mediaCoverageData.length)
+      const totalData = mediaCoverageOffset + result.length
+      setHasMoreMediaCoverage((mediaCoverageQuery.data.content.record || 0) > totalData)
       setIsLoadingMore(false)
     }
   }, [mediaCoverageQuery.data, mediaCoverageOffset, selectedFilter])
@@ -79,13 +81,14 @@ export default function PressPage() {
       const pressResult = Array.isArray(allPressQuery.data.content.result) ? allPressQuery.data.content.result : []
       const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
       const combinedData = [...pressResult, ...mediaResult]
-      if (allOffset === 0) {
-        setPressReleaseData(combinedData.slice(0, 10))
-      } else {
-        setPressReleaseData((prev) => [...prev, ...combinedData.slice(0, 10)])
-      }
-      const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
-      setHasMoreAll(totalRecords > pressReleaseData.length)
+      
+      setPressReleaseData((prev) => {
+        const merged = allOffset === 0 ? combinedData.slice(0, 10) : [...prev, ...combinedData.slice(0, 10)]
+        const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
+        setHasMoreAll(totalRecords > merged.length)
+        return merged
+      })
+      
       setIsLoadingMore(false)
     }
   }, [allPressQuery.data, allMediaQuery.data, allOffset, selectedFilter])
@@ -115,13 +118,21 @@ export default function PressPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isLoadingMore) {
-          setIsLoadingMore(true)
+          let shouldLoadMore = false
+          
           if (selectedFilter === 'press-release' && hasMorePressRelease) {
+            shouldLoadMore = true
             setPressReleaseOffset((prev) => prev + 10)
           } else if (selectedFilter === 'media-coverage' && hasMoreMediaCoverage) {
+            shouldLoadMore = true
             setMediaCoverageOffset((prev) => prev + 10)
           } else if (selectedFilter === 'all' && hasMoreAll) {
+            shouldLoadMore = true
             setAllOffset((prev) => prev + 10)
+          }
+          
+          if (shouldLoadMore) {
+            setIsLoadingMore(true)
           }
         }
       },
