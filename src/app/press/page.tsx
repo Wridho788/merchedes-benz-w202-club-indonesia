@@ -27,13 +27,16 @@ export default function PressPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [pressReleaseData, setPressReleaseData] = useState<PressRelase[]>([])
   const [mediaCoverageData, setMediaCoverageData] = useState<PressRelase[]>([])
+  const [allPressData, setAllPressData] = useState<PressRelase[]>([])
+  const [allMediaData, setAllMediaData] = useState<PressRelase[]>([])
   const [pressReleaseOffset, setPressReleaseOffset] = useState(0)
   const [mediaCoverageOffset, setMediaCoverageOffset] = useState(0)
   const [allPressOffset, setAllPressOffset] = useState(0)
   const [allMediaOffset, setAllMediaOffset] = useState(0)
   const [hasMorePressRelease, setHasMorePressRelease] = useState(true)
   const [hasMoreMediaCoverage, setHasMoreMediaCoverage] = useState(true)
-  const [hasMoreAll, setHasMoreAll] = useState(true)
+  const [hasMoreAllPress, setHasMoreAllPress] = useState(true)
+  const [hasMoreAllMedia, setHasMoreAllMedia] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -94,26 +97,40 @@ export default function PressPage() {
     }
   }, [mediaCoverageQuery.data, mediaCoverageOffset, selectedFilter])
 
-  // Handle all filter - combine from separate offsets
+  // Handle all filter - combine from separate data arrays
   useEffect(() => {
-    if (selectedFilter === 'all' && allPressQuery.data && allMediaQuery.data) {
+    if (selectedFilter === 'all' && allPressQuery.data) {
       try {
         const pressResult = Array.isArray(allPressQuery.data.content.result) ? allPressQuery.data.content.result : []
-        const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
-        
-        // Don't slice - combine the paginated results directly
-        const combinedData = [...pressResult, ...mediaResult]
-        
-        if (allPressOffset === 0 && allMediaOffset === 0) {
-          setPressReleaseData(combinedData)
+        if (allPressOffset === 0) {
+          setAllPressData(pressResult)
         } else {
-          setPressReleaseData((prev) => [...prev, ...combinedData])
+          setAllPressData((prev) => [...prev, ...pressResult])
         }
-        
-        const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
-        const totalFetched = (allPressOffset + pressResult.length) + (allMediaOffset + mediaResult.length)
-        
-        setHasMoreAll(totalRecords > totalFetched)
+        const totalData = allPressOffset + pressResult.length
+        setHasMoreAllPress((allPressQuery.data.content.record || 0) > totalData)
+        setError(null)
+        setIsInitialLoading(false)
+      } catch (err) {
+        setError('Gagal mengambil data press release')
+        setIsInitialLoading(false)
+      }
+      setIsLoadingMore(false)
+    }
+  }, [allPressQuery.data, allPressOffset, selectedFilter])
+
+  // Handle all filter media - separate from press
+  useEffect(() => {
+    if (selectedFilter === 'all' && allMediaQuery.data) {
+      try {
+        const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
+        if (allMediaOffset === 0) {
+          setAllMediaData(mediaResult)
+        } else {
+          setAllMediaData((prev) => [...prev, ...mediaResult])
+        }
+        const totalData = allMediaOffset + mediaResult.length
+        setHasMoreAllMedia((allMediaQuery.data.content.record || 0) > totalData)
         setError(null)
         setIsInitialLoading(false)
       } catch (err) {
@@ -122,7 +139,7 @@ export default function PressPage() {
       }
       setIsLoadingMore(false)
     }
-  }, [allPressQuery.data, allMediaQuery.data, allPressOffset, allMediaOffset, selectedFilter])
+  }, [allMediaQuery.data, allMediaOffset, selectedFilter])
 
   // Reset data when filter changes
   useEffect(() => {
@@ -135,18 +152,24 @@ export default function PressPage() {
       setMediaCoverageData([])
       setAllPressOffset(0)
       setAllMediaOffset(0)
+      setAllPressData([])
+      setAllMediaData([])
     } else if (selectedFilter === 'media-coverage') {
       setMediaCoverageOffset(0)
       setPressReleaseData([])
       setAllPressOffset(0)
       setAllMediaOffset(0)
+      setAllPressData([])
+      setAllMediaData([])
     } else if (selectedFilter === 'all') {
       setAllPressOffset(0)
       setAllMediaOffset(0)
-      setPressReleaseData([])
-      setMediaCoverageData([])
+      setAllPressData([])
+      setAllMediaData([])
       setPressReleaseOffset(0)
       setMediaCoverageOffset(0)
+      setPressReleaseData([])
+      setMediaCoverageData([])
     }
   }, [selectedFilter])
 
@@ -163,11 +186,15 @@ export default function PressPage() {
           } else if (selectedFilter === 'media-coverage' && hasMoreMediaCoverage) {
             shouldLoadMore = true
             setMediaCoverageOffset((prev) => prev + 10)
-          } else if (selectedFilter === 'all' && hasMoreAll) {
+          } else if (selectedFilter === 'all' && (hasMoreAllPress || hasMoreAllMedia)) {
             shouldLoadMore = true
-            // Increment both offsets for "all" filter
-            setAllPressOffset((prev) => prev + 10)
-            setAllMediaOffset((prev) => prev + 10)
+            // Increment both offsets only if they still have more data
+            if (hasMoreAllPress) {
+              setAllPressOffset((prev) => prev + 10)
+            }
+            if (hasMoreAllMedia) {
+              setAllMediaOffset((prev) => prev + 10)
+            }
           }
           
           if (shouldLoadMore) {
@@ -187,12 +214,20 @@ export default function PressPage() {
         observer.unobserve(observerTarget.current)
       }
     }
-  }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, hasMoreAll, isLoadingMore])
+  }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, hasMoreAllPress, hasMoreAllMedia, isLoadingMore])
 
   // Filter results based on search
   const getDisplayData = () => {
     if (selectedFilter === 'media-coverage') {
       return mediaCoverageData
+    } else if (selectedFilter === 'all') {
+      // Combine press and media data, then sort by date (newest first)
+      const combined = [...allPressData, ...allMediaData]
+      return combined.sort((a, b) => {
+        const dateA = new Date(a.date.replace(/(\d{2}) (\w+) (\d{4})/, '$2 $1, $3')).getTime()
+        const dateB = new Date(b.date.replace(/(\d{2}) (\w+) (\d{4})/, '$2 $1, $3')).getTime()
+        return dateB - dateA // Newest first
+      })
     }
     return pressReleaseData
   }
@@ -202,7 +237,8 @@ export default function PressPage() {
   const filteredPress = displayData.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.text.toLowerCase().includes(searchQuery.toLowerCase())
+      item.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.shortdesc?.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesSearch
   })
 
@@ -302,9 +338,9 @@ export default function PressPage() {
                 filteredPress.map((item) => (
                   <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                     {/* Image */}
-                    <div className="h-48 overflow-hidden">
+                    <div className="h-48 overflow-hidden bg-gray-200">
                       <img
-                        src={item.image}
+                        src={item.image || '/images/press-default.jpg'}
                         alt={item.title}
                         className="w-full h-full object-cover hover:scale-105 transition duration-500"
                       />
@@ -321,7 +357,7 @@ export default function PressPage() {
                       <p className="text-sm text-gray-600 mb-1">
                         {item.date}
                       </p>
-                      <p className="text-sm mb-4 line-clamp-3">{item.text || item.shortdesc}</p>
+                      <p className="text-sm mb-4 line-clamp-3">{item.shortdesc || item.text || 'Tidak ada deskripsi'}</p>
                       {item.link && (
                         <a
                           href={item.link}
