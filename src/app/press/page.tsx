@@ -74,155 +74,127 @@ export default function PressPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [pressReleaseData, setPressReleaseData] = useState<PressRelase[]>([])
   const [mediaCoverageData, setMediaCoverageData] = useState<PressRelase[]>([])
-  const [allPressData, setAllPressData] = useState<PressRelase[]>([])
-  const [allMediaData, setAllMediaData] = useState<PressRelase[]>([])
-  const [pressReleaseOffset, setPressReleaseOffset] = useState(0)
-  const [mediaCoverageOffset, setMediaCoverageOffset] = useState(0)
-  const [allPressOffset, setAllPressOffset] = useState(0)
-  const [allMediaOffset, setAllMediaOffset] = useState(0)
+  const [pressReleaseOffset, setPressReleaseOffset] = useState(10)
+  const [mediaCoverageOffset, setMediaCoverageOffset] = useState(10)
   const [hasMorePressRelease, setHasMorePressRelease] = useState(true)
   const [hasMoreMediaCoverage, setHasMoreMediaCoverage] = useState(true)
-  const [hasMoreAllPress, setHasMoreAllPress] = useState(true)
-  const [hasMoreAllMedia, setHasMoreAllMedia] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [isInitialLoading, setIsInitialLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [totalPressRecords, setTotalPressRecords] = useState(0)
+  const [totalMediaRecords, setTotalMediaRecords] = useState(0)
+  const [dataFetched, setDataFetched] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
-  // Fetch data based on filter
-  const pressReleasePayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: pressReleaseOffset }
-  const mediaCoveragePayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: mediaCoverageOffset }
-  const allPressPayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: allPressOffset }
-  const allMediaPayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: allMediaOffset }
+  // Initial fetch for both press release and media coverage (offset 0)
+  const initialPressPayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: 0 }
+  const initialMediaPayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: 0 }
 
-  const pressReleaseQuery = usePressConference(pressReleasePayload)
-  const mediaCoverageQuery = useMediaCoverage(mediaCoveragePayload)
-  const allPressQuery = usePressConference(allPressPayload)
-  const allMediaQuery = useMediaCoverage(allMediaPayload)
+  // Fetch payloads for infinite scroll (only when needed)
+  const pressReleaseInfinityPayload = { ...PRESS_CONFERENCE_PAYLOAD, offset: pressReleaseOffset }
+  const mediaCoverageInfinityPayload = { ...MEDIA_COVERAGE_PAYLOAD, offset: mediaCoverageOffset }
 
-  // Handle press-release filter
+  // Always fetch initial data for both filters on component mount
+  const pressReleaseQuery = usePressConference(initialPressPayload)
+  const mediaCoverageQuery = useMediaCoverage(initialMediaPayload)
+
+  // Only fetch for infinite scroll when actively scrolling a filter
+  const infinityPressQuery = usePressConference(
+    selectedFilter === 'press-release' && isLoadingMore ? pressReleaseInfinityPayload : initialPressPayload
+  )
+  const infinityMediaQuery = useMediaCoverage(
+    selectedFilter === 'media-coverage' && isLoadingMore ? mediaCoverageInfinityPayload : initialMediaPayload
+  )
+
+  // Handle initial fetch for press release and media coverage
   useEffect(() => {
-    if (selectedFilter === 'press-release' && pressReleaseQuery.data) {
+    if (pressReleaseQuery.data && mediaCoverageQuery.data && !dataFetched) {
       try {
-        const result = Array.isArray(pressReleaseQuery.data.content.result) ? pressReleaseQuery.data.content.result : []
-        if (pressReleaseOffset === 0) {
-          setPressReleaseData(result)
-        } else {
-          setPressReleaseData((prev) => [...prev, ...result])
-        }
-        const totalData = pressReleaseOffset + result.length
-        setHasMorePressRelease((pressReleaseQuery.data.content.record || 0) > totalData)
-        setError(null)
-        setIsInitialLoading(false)
-      } catch (err) {
-        setError('Gagal mengambil data press release')
-        setIsInitialLoading(false)
-      }
-      setIsLoadingMore(false)
-    }
-  }, [pressReleaseQuery.data, pressReleaseOffset, selectedFilter])
+        const pressResult = Array.isArray(pressReleaseQuery.data.content.result) 
+          ? pressReleaseQuery.data.content.result 
+          : []
+        const mediaResult = Array.isArray(mediaCoverageQuery.data.content.result) 
+          ? mediaCoverageQuery.data.content.result 
+          : []
 
-  // Handle media-coverage filter
-  useEffect(() => {
-    if (selectedFilter === 'media-coverage' && mediaCoverageQuery.data) {
-      try {
-        const result = Array.isArray(mediaCoverageQuery.data.content.result) ? mediaCoverageQuery.data.content.result : []
-        if (mediaCoverageOffset === 0) {
-          setMediaCoverageData(result)
-        } else {
-          setMediaCoverageData((prev) => [...prev, ...result])
-        }
-        const totalData = mediaCoverageOffset + result.length
-        setHasMoreMediaCoverage((mediaCoverageQuery.data.content.record || 0) > totalData)
-        setError(null)
-        setIsInitialLoading(false)
-      } catch (err) {
-        setError('Gagal mengambil data media coverage')
-        setIsInitialLoading(false)
-      }
-      setIsLoadingMore(false)
-    }
-  }, [mediaCoverageQuery.data, mediaCoverageOffset, selectedFilter])
-
-  // Handle all filter - combine from separate data arrays
-  useEffect(() => {
-    if (selectedFilter === 'all' && allPressQuery.data) {
-      try {
-        const pressResult = Array.isArray(allPressQuery.data.content.result) ? allPressQuery.data.content.result : []
-        if (allPressOffset === 0) {
-          setAllPressData(pressResult)
-        } else {
-          setAllPressData((prev) => [...prev, ...pressResult])
-        }
-        const totalData = allPressOffset + pressResult.length
-        setHasMoreAllPress((allPressQuery.data.content.record || 0) > totalData)
-        setError(null)
-        setIsInitialLoading(false)
-      } catch (err) {
-        setError('Gagal mengambil data press release')
-        setIsInitialLoading(false)
-      }
-      setIsLoadingMore(false)
-    }
-  }, [allPressQuery.data, allPressOffset, selectedFilter])
-
-  // Handle all filter media - separate from press
-  useEffect(() => {
-    if (selectedFilter === 'all' && allMediaQuery.data) {
-      try {
-        const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
-        if (allMediaOffset === 0) {
-          setAllMediaData(mediaResult)
-        } else {
-          setAllMediaData((prev) => [...prev, ...mediaResult])
-        }
-        const totalData = allMediaOffset + mediaResult.length
-        setHasMoreAllMedia((allMediaQuery.data.content.record || 0) > totalData)
+        setPressReleaseData(pressResult)
+        setMediaCoverageData(mediaResult)
+        setTotalPressRecords(pressReleaseQuery.data.content.record || 0)
+        setTotalMediaRecords(mediaCoverageQuery.data.content.record || 0)
+        setDataFetched(true)
         setError(null)
         setIsInitialLoading(false)
       } catch (err) {
         setError('Gagal mengambil data')
         setIsInitialLoading(false)
       }
-      setIsLoadingMore(false)
     }
-  }, [allMediaQuery.data, allMediaOffset, selectedFilter])
+  }, [pressReleaseQuery.data, mediaCoverageQuery.data, dataFetched])
 
-  // Reset data when filter changes
+  // Handle infinite scroll for press release
   useEffect(() => {
-    setIsInitialLoading(true)
-    setError(null)
-    setIsLoadingMore(false)
-    setSearchQuery('') // Reset search query on filter change
-    
-    if (selectedFilter === 'press-release') {
-      setPressReleaseOffset(0)
-      setMediaCoverageData([])
-      setAllPressOffset(0)
-      setAllMediaOffset(0)
-      setAllPressData([])
-      setAllMediaData([])
-    } else if (selectedFilter === 'media-coverage') {
-      setMediaCoverageOffset(0)
-      setPressReleaseData([])
-      setAllPressOffset(0)
-      setAllMediaOffset(0)
-      setAllPressData([])
-      setAllMediaData([])
-    } else if (selectedFilter === 'all') {
-      setAllPressOffset(0)
-      setAllMediaOffset(0)
-      setAllPressData([])
-      setAllMediaData([])
-      setPressReleaseOffset(0)
-      setMediaCoverageOffset(0)
-      setPressReleaseData([])
-      setMediaCoverageData([])
+    if (selectedFilter === 'press-release' && isLoadingMore && infinityPressQuery.data && dataFetched) {
+      try {
+        const result = Array.isArray(infinityPressQuery.data.content.result) 
+          ? infinityPressQuery.data.content.result 
+          : []
+        if (result.length > 0) {
+          setPressReleaseData((prev) => [...prev, ...result])
+          const totalData = pressReleaseOffset + result.length
+          setHasMorePressRelease(totalPressRecords > totalData)
+        } else {
+          setHasMorePressRelease(false)
+        }
+        setIsLoadingMore(false)
+      } catch (err) {
+        setError('Gagal mengambil data press release')
+        setIsLoadingMore(false)
+      }
     }
-    
-    // Scroll to top
+  }, [infinityPressQuery.data, pressReleaseOffset, selectedFilter, isLoadingMore, dataFetched, totalPressRecords])
+
+  // Handle infinite scroll for media coverage
+  useEffect(() => {
+    if (selectedFilter === 'media-coverage' && isLoadingMore && infinityMediaQuery.data && dataFetched) {
+      try {
+        const result = Array.isArray(infinityMediaQuery.data.content.result) 
+          ? infinityMediaQuery.data.content.result 
+          : []
+        if (result.length > 0) {
+          setMediaCoverageData((prev) => [...prev, ...result])
+          const totalData = mediaCoverageOffset + result.length
+          setHasMoreMediaCoverage(totalMediaRecords > totalData)
+        } else {
+          setHasMoreMediaCoverage(false)
+        }
+        setIsLoadingMore(false)
+      } catch (err) {
+        setError('Gagal mengambil data media coverage')
+        setIsLoadingMore(false)
+      }
+    }
+  }, [infinityMediaQuery.data, mediaCoverageOffset, selectedFilter, isLoadingMore, dataFetched, totalMediaRecords])
+
+  // Reset on filter change - but keep data loaded
+  useEffect(() => {
+    setSearchQuery('') // Reset search query on filter change
     window.scrollTo(0, 0)
-  }, [selectedFilter])
+    setIsLoadingMore(false)
+    setError(null)
+
+    // Check if more data available for current filter
+    if (selectedFilter === 'press-release') {
+      const totalData = 10 // Initial fetch size
+      setHasMorePressRelease(totalPressRecords > totalData)
+    } else if (selectedFilter === 'media-coverage') {
+      const totalData = 10 // Initial fetch size
+      setHasMoreMediaCoverage(totalMediaRecords > totalData)
+    } else if (selectedFilter === 'all') {
+      const totalData = 10 + 10 // Both initial fetches combined
+      setHasMorePressRelease(totalPressRecords > 10)
+      setHasMoreMediaCoverage(totalMediaRecords > 10)
+    }
+  }, [selectedFilter, totalPressRecords, totalMediaRecords])
 
   // Infinite scroll intersection observer - memoized
   useEffect(() => {
@@ -239,13 +211,13 @@ export default function PressPage() {
       } else if (selectedFilter === 'media-coverage' && hasMoreMediaCoverage) {
         shouldLoadMore = true
         setMediaCoverageOffset((prev) => prev + 10)
-      } else if (selectedFilter === 'all' && (hasMoreAllPress || hasMoreAllMedia)) {
+      } else if (selectedFilter === 'all' && (hasMorePressRelease || hasMoreMediaCoverage)) {
         shouldLoadMore = true
-        if (hasMoreAllPress) {
-          setAllPressOffset((prev) => prev + 10)
+        if (hasMorePressRelease) {
+          setPressReleaseOffset((prev) => prev + 10)
         }
-        if (hasMoreAllMedia) {
-          setAllMediaOffset((prev) => prev + 10)
+        if (hasMoreMediaCoverage) {
+          setMediaCoverageOffset((prev) => prev + 10)
         }
       }
       
@@ -262,7 +234,7 @@ export default function PressPage() {
         observer.unobserve(observerTarget.current)
       }
     }
-  }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, hasMoreAllPress, hasMoreAllMedia, isLoadingMore])
+  }, [selectedFilter, hasMorePressRelease, hasMoreMediaCoverage, isLoadingMore])
 
   // Filter results based on search with memoization
   const getDisplayData = useCallback(() => {
@@ -270,7 +242,7 @@ export default function PressPage() {
       return mediaCoverageData
     } else if (selectedFilter === 'all') {
       // Combine press and media data, then sort by date (newest first)
-      const combined = [...allPressData, ...allMediaData]
+      const combined = [...pressReleaseData, ...mediaCoverageData]
       return combined.sort((a, b) => {
         const dateA = parseDate(a.date)
         const dateB = parseDate(b.date)
@@ -278,7 +250,7 @@ export default function PressPage() {
       })
     }
     return pressReleaseData
-  }, [selectedFilter, pressReleaseData, mediaCoverageData, allPressData, allMediaData])
+  }, [selectedFilter, pressReleaseData, mediaCoverageData])
 
   const displayData = useMemo(() => getDisplayData(), [getDisplayData])
 
