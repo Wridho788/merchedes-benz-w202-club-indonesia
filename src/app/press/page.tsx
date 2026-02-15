@@ -33,6 +33,7 @@ export default function PressPage() {
   const [hasMorePressRelease, setHasMorePressRelease] = useState(true)
   const [hasMoreMediaCoverage, setHasMoreMediaCoverage] = useState(true)
   const [hasMoreAll, setHasMoreAll] = useState(true)
+  const [allFetchedCount, setAllFetchedCount] = useState(0)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -82,12 +83,21 @@ export default function PressPage() {
       const mediaResult = Array.isArray(allMediaQuery.data.content.result) ? allMediaQuery.data.content.result : []
       const combinedData = [...pressResult, ...mediaResult]
       
-      setPressReleaseData((prev) => {
-        const merged = allOffset === 0 ? combinedData.slice(0, 10) : [...prev, ...combinedData.slice(0, 10)]
-        const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
-        setHasMoreAll(totalRecords > merged.length)
-        return merged
-      })
+      if (allOffset === 0) {
+        const sliced = combinedData.slice(0, 10)
+        setPressReleaseData(sliced)
+        setAllFetchedCount(sliced.length)
+      } else {
+        const sliced = combinedData.slice(0, 10)
+        setPressReleaseData((prev) => [...prev, ...sliced])
+        setAllFetchedCount((prev) => prev + sliced.length)
+      }
+      
+      const totalRecords = (allPressQuery.data.content.record || 0) + (allMediaQuery.data.content.record || 0)
+      
+      // Calculate total fetched so far
+      const totalFetched = allOffset + combinedData.length
+      setHasMoreAll(totalRecords > totalFetched)
       
       setIsLoadingMore(false)
     }
@@ -99,16 +109,19 @@ export default function PressPage() {
       setPressReleaseOffset(0)
       setMediaCoverageData([])
       setAllOffset(0)
+      setAllFetchedCount(0)
     } else if (selectedFilter === 'media-coverage') {
       setMediaCoverageOffset(0)
       setPressReleaseData([])
       setAllOffset(0)
+      setAllFetchedCount(0)
     } else if (selectedFilter === 'all') {
       setAllOffset(0)
       setPressReleaseData([])
       setMediaCoverageData([])
       setPressReleaseOffset(0)
       setMediaCoverageOffset(0)
+      setAllFetchedCount(0)
     }
     setIsLoadingMore(false)
   }, [selectedFilter])
