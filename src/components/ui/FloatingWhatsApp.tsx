@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FaWhatsapp } from "react-icons/fa";
 import { useChapterById } from "@/lib/hooks/useChapterById";
 import { CHAPTER_ID } from "@/lib/constants/api";
 
@@ -30,13 +31,12 @@ export default function FloatingWhatsApp({ className = "" }: { className?: strin
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat via WhatsApp"
-        className="flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-full shadow-lg transition"
+        className="flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-4 py-3 rounded-full shadow-2xl transition transform hover:-translate-y-0.5"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-          <path d="M21 15a2 2 0 0 1-2 2h-1l-1 1-1-1H8a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h8l4 4v6z"></path>
-          <path d="M16 11.37a4 4 0 1 1-2.63-2.63"></path>
-        </svg>
-        <span className="hidden sm:inline-block font-medium">Hubungi via WhatsApp</span>
+        <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10">
+          <FaWhatsapp className="w-5 h-5 text-white" />
+        </span>
+        <span className="ml-1 text-sm sm:text-base font-semibold">Live Chat</span>
       </a>
     </div>
   );
