@@ -7,6 +7,7 @@ import HomeEvent from '@/components/sections/HomeEvent'
 import HomePressRelease from '@/components/sections/HomePressRelease'
 import HomeFeaturedMembers from '@/components/sections/HomeFeaturedMembers'
 import HomeCTA from '@/components/sections/HomeCTA'
+import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp'
 
 export const metadata: Metadata = {
   title: 'Mercedes Benz W202 Club Indonesia | Komunitas Pecinta Mercedes W202',
@@ -45,6 +46,7 @@ export default function Home() {
       <HomePressRelease />
       <HomeFeaturedMembers />
       <HomeCTA />
+      <FloatingWhatsApp />
     </div>
   )
 }
