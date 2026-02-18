@@ -36,7 +36,7 @@ export default function FloatingWhatsApp({ className = "" }: { className?: strin
         <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10">
           <FaWhatsapp className="w-5 h-5 text-white" />
         </span>
-        <span className="ml-1 text-sm sm:text-base font-semibold">Live Chat</span>
+        <span className="mr-2 text-sm sm:text-base font-semibold">Live Chat</span>
       </a>
     </div>
   );
