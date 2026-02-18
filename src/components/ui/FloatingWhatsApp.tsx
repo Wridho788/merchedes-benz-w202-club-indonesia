@@ -15,7 +15,7 @@ function formatPhoneForWhatsApp(phone?: string) {
 
 export default function FloatingWhatsApp({ className = "" }: { className?: string }) {
   const { data: chapterData } = useChapterById(CHAPTER_ID);
-  const phoneRaw = chapterData?.content?.result?.phone;
+  const phoneRaw = chapterData?.content?.result?.billing_contact;
   const phone = formatPhoneForWhatsApp(phoneRaw);
   const href = phone ? `https://wa.me/${phone}` : "#";
 
