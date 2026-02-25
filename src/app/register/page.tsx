@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useGetChapter } from "@/lib/hooks/useGetChapter";
 import { useGetCity } from "@/lib/hooks/useGetCity";
 import { useMemberAdd } from "@/lib/hooks/useMemberAdd";
-import { useReqOtp } from "@/lib/hooks/useReqOtp";
 import Swal from "sweetalert2";
 
 interface FormData {
@@ -53,10 +52,11 @@ export default function RegisterPage() {
 
   // Mutations
   const memberAddMutation = useMemberAdd();
-  const reqOtpMutation = useReqOtp();
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -105,21 +105,28 @@ export default function RegisterPage() {
     try {
       // Register member
       const registerResult = await memberAddMutation.mutateAsync(formData);
-
-      if (registerResult.content?.id) {
-        // Request OTP
-        await reqOtpMutation.mutateAsync({
-          username: formData.tphone1,
-        });
-
+      console.log(registerResult, "register result");
+      
+      // Check if status code is 200
+      if (registerResult.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Registrasi Berhasil!",
-          text: "Kode OTP telah dikirim ke nomor telepon Anda.",
+          text: "Silakan verifikasi nomor telepon Anda.",
           confirmButtonText: "Lanjutkan Verifikasi",
         }).then(() => {
-          // Redirect to verify page with customer ID
-          router.push(`/verify?id=${registerResult.content.id}`);
+          // Redirect to verify page with customer ID and phone number
+          const params = new URLSearchParams({
+            id: registerResult.content.id,
+            phone: formData.tphone1,
+          });
+          router.push(`/verify?${params.toString()}`);
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Registrasi Gagal",
+          text: "Terjadi kesalahan saat registrasi. Silakan coba lagi.",
         });
       }
     } catch (error) {

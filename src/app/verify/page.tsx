@@ -1,32 +1,90 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useVerify } from "@/lib/hooks/useVerify";
+import { useReqOtp } from "@/lib/hooks/useReqOtp";
 import Swal from "sweetalert2";
+
+const OTP_EXPIRE_SECONDS = 60;
 
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const customerId = searchParams.get("id");
+  const phoneNumber = searchParams.get("phone");
 
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timer, setTimer] = useState(OTP_EXPIRE_SECONDS);
+  const [canResend, setCanResend] = useState(false);
+  
+  // Use ref to track if OTP has been requested (prevents re-renders from triggering)
+  const otpRequestedRef = useRef(false);
 
   const verifyMutation = useVerify();
+  const reqOtpMutation = useReqOtp();
 
+  // Request OTP function
+  const requestOtp = useCallback(async () => {
+    if (!phoneNumber) return;
+    
+    try {
+      await reqOtpMutation.mutateAsync({ username: phoneNumber });
+      setTimer(OTP_EXPIRE_SECONDS);
+      setCanResend(false);
+    } catch (error) {
+      console.error("Request OTP error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Mengirim OTP",
+        text: error instanceof Error ? error.message : "Terjadi kesalahan saat mengirim OTP.",
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneNumber]);
+
+  // Auto request OTP on mount (only once)
   useEffect(() => {
-    if (!customerId) {
+    if (!customerId || !phoneNumber) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "ID Customer tidak ditemukan. Silakan registrasi ulang.",
+        text: "Data tidak lengkap. Silakan registrasi ulang.",
         confirmButtonText: "Kembali ke Registrasi",
       }).then(() => {
         router.push("/register");
       });
+      return;
     }
-  }, [customerId, router]);
+
+    // Request OTP automatically on first load only
+    if (!otpRequestedRef.current) {
+      otpRequestedRef.current = true;
+      requestOtp();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerId, phoneNumber]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (timer <= 0) {
+      setCanResend(true);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  // Handle resend OTP
+  const handleResendOtp = async () => {
+    if (!canResend) return;
+    await requestOtp();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,6 +142,13 @@ function VerifyContent() {
     }
   };
 
+  // Format timer display
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4">
@@ -98,6 +163,11 @@ function VerifyContent() {
             <div className="w-24 h-1 bg-brand-accent mx-auto mb-4"></div>
             <p className="text-gray-600">
               Masukkan kode OTP yang telah dikirim ke nomor telepon Anda
+              {phoneNumber && (
+                <span className="block mt-1 font-medium text-brand-primary">
+                  {phoneNumber}
+                </span>
+              )}
             </p>
           </div>
 
@@ -125,6 +195,22 @@ function VerifyContent() {
                 </div>
               </div>
 
+              {/* Countdown Timer */}
+              <div className="text-center">
+                {timer > 0 ? (
+                  <div className="text-lg font-medium text-gray-700">
+                    Kode berlaku dalam{" "}
+                    <span className="text-brand-primary font-bold">
+                      {formatTime(timer)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="text-lg font-medium text-red-500">
+                    Kode OTP telah kadaluarsa
+                  </div>
+                )}
+              </div>
+
               {/* OTP Input */}
               <div>
                 <label
@@ -142,6 +228,7 @@ function VerifyContent() {
                   className="w-full px-4 py-4 text-center text-2xl tracking-widest border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="- - - - - -"
                   maxLength={6}
+                  disabled={timer <= 0}
                   required
                 />
                 <p className="text-sm text-gray-500 mt-2 text-center">
@@ -153,7 +240,7 @@ function VerifyContent() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  disabled={isSubmitting || otp.length < 4}
+                  disabled={isSubmitting || otp.length < 4 || timer <= 0}
                   className="w-full bg-brand-primary hover:bg-brand-primary/90 text-white py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
@@ -173,17 +260,19 @@ function VerifyContent() {
                   Tidak menerima kode?{" "}
                   <button
                     type="button"
-                    className="text-brand-primary hover:underline font-medium"
-                    onClick={() => {
-                      Swal.fire({
-                        icon: "info",
-                        title: "Kirim Ulang OTP",
-                        text: "Silakan kembali ke halaman registrasi untuk meminta OTP baru.",
-                        confirmButtonText: "OK",
-                      });
-                    }}
+                    className={`font-medium ${
+                      canResend
+                        ? "text-brand-primary hover:underline cursor-pointer"
+                        : "text-gray-400 cursor-not-allowed"
+                    }`}
+                    onClick={handleResendOtp}
+                    disabled={!canResend || reqOtpMutation.isPending}
                   >
-                    Kirim ulang
+                    {reqOtpMutation.isPending
+                      ? "Mengirim..."
+                      : canResend
+                      ? "Kirim ulang"
+                      : `Kirim ulang (${formatTime(timer)})`}
                   </button>
                 </p>
               </div>

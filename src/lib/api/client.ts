@@ -56,37 +56,38 @@ export const fetchMembers = async (
 export const fetchMemberAdd = async (
   payload: RegisterRequest,
 ): Promise<ResponseMemberAdd> => {
-  const formData = new URLSearchParams();
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, String(value));
-  });
-  
-  const response = await apiClient.post<ResponseMemberAdd>(
+  const response = await apiClient.post<ApiResponseMemberAdd>(
     API_ENDPOINTS.MEMBER_ADD,
-    formData.toString(),
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }
+    payload,
   );
-  return response.data;
+  return {
+    content: response.data.content,
+    status: response.status,
+  };
 }
 
 // Request OTP
 export const fetchReqOtp = async (
   payload: PayloadRequestOTP,
 ): Promise<ResponseRequestOTP> => {
-  const response = await apiClient.post<ResponseRequestOTP>(
-    API_ENDPOINTS.REQ_OTP,
-    payload,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  try {
+    const response = await apiClient.post<ResponseRequestOTP>(
+      API_ENDPOINTS.REQ_OTP,
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      // Throw error with API error message
+      throw new Error(error.response.data.error);
     }
-  );
-  return response.data;
+    throw error;
+  }
 }
 
 // Verify OTP
@@ -493,59 +494,69 @@ export interface PressRelase {
   permalink: string;
 }
 
+// Raw API response for member add (without HTTP status)
+export interface ApiResponseMemberAdd {
+  content: MemberAddContent;
+}
+
+// Member add content
+export interface MemberAddContent {
+  id: string;
+  quinos_id: string | null;
+  clubid: string;
+  first_name: string;
+  last_name: string | null;
+  type: string;
+  address: string;
+  shipping_address: string;
+  province_name: string | null;
+  city_name: string | null;
+  district_name: string | null;
+  shipping_province: string | null;
+  shipping_city: string | null;
+  shipping_district: string | null;
+  phone1: string;
+  phone2: string;
+  fax: string;
+  email: string;
+  password: string;
+  website: string;
+  state: string;
+  city: string;
+  region: string;
+  zip: string;
+  notes: string;
+  image: string | null;
+  npwp: string | null;
+  profession: string | null;
+  organization: string | null;
+  member_no: string;
+  instagram: string | null;
+  joined: string;
+  premium: string;
+  status: string;
+  voucher_claimed: string;
+  mtype: string;
+  dob: string;
+  nik: string;
+  car_type: string;
+  chasis_no: string | null;
+  engine_no: string | null;
+  police_no: string;
+  car_image: string | null;
+  expired: string | null;
+  verified: string;
+  billing_num: string;
+  isfeatured: string;
+  created: string;
+  updated: string | null;
+  deleted: string | null;
+}
+
+// Response with HTTP status code
 export interface ResponseMemberAdd {
-  content: {
-    id: string;
-    quinos_id: string | null;
-    clubid: string;
-    first_name: string;
-    last_name: string | null;
-    type: string;
-    address: string;
-    shipping_address: string;
-    province_name: string | null;
-    city_name: string | null;
-    district_name: string | null;
-    shipping_province: string | null;
-    shipping_city: string | null;
-    shipping_district: string | null;
-    phone1: string;
-    phone2: string;
-    fax: string;
-    email: string;
-    password: string;
-    website: string;
-    state: string;
-    city: string;
-    region: string;
-    zip: string;
-    notes: string;
-    image: string | null;
-    npwp: string | null;
-    profession: string | null;
-    organization: string | null;
-    member_no: string;
-    instagram: string | null;
-    joined: string;
-    premium: string;
-    status: string;
-    voucher_claimed: string;
-    mtype: string;
-    dob: string;
-    nik: string;
-    car_type: string;
-    chasis_no: string | null;
-    engine_no: string | null;
-    police_no: string;
-    car_image: string | null;
-    expired: string | null;
-    verified: string;
-    billing_num: string;
-    isfeatured: string;
-    created: string;
-    updated: string | null;
-    deleted: string | null;
-  };
+  content: MemberAddContent;
+  status: number;
 }
 
 export interface PayloadRequestOTP {
@@ -626,3 +637,4 @@ export interface RegisterRequest {
   tcartype: string;
   tpoliceno: string;
 }
+
