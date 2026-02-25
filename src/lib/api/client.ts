@@ -64,7 +64,7 @@ export const fetchMemberAdd = async (
     content: response.data.content,
     status: response.status,
   };
-}
+};
 
 // Request OTP
 export const fetchReqOtp = async (
@@ -76,9 +76,9 @@ export const fetchReqOtp = async (
       payload,
       {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -88,7 +88,7 @@ export const fetchReqOtp = async (
     }
     throw error;
   }
-}
+};
 
 // Verify OTP
 export const fetchVerify = async (
@@ -99,31 +99,21 @@ export const fetchVerify = async (
     `${API_ENDPOINTS.VERIFY}${customerId}/${otp}`,
   );
   return response.data;
-}
+};
 
 // Get Chapters
-export const fetchGetChapter = async (
-  payload: payloadChapter,
-): Promise<responseChapter> => {
-  const response = await apiClient.post<responseChapter>(
+export const fetchGetChapter = async (): Promise<ChapterResponse> => {
+  const response = await apiClient.get<ChapterResponse>(
     API_ENDPOINTS.GET_CHAPTER,
-    payload,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
   );
   return response.data;
-}
+};
 
 // Get Cities
 export const fetchGetCity = async (): Promise<CityResponse> => {
-  const response = await apiClient.get<CityResponse>(
-    API_ENDPOINTS.GET_CITY,
-  );
+  const response = await apiClient.get<CityResponse>(API_ENDPOINTS.GET_CITY);
   return response.data;
-}
+};
 
 // Event API Functions
 export const fetchEventIndexWebsite = async (
@@ -567,7 +557,7 @@ export interface ResponseRequestOTP {
   content: string;
 }
 
-export interface payloadChapter{
+export interface payloadChapter {
   limit: number;
   offset: number;
 }
@@ -575,8 +565,8 @@ export interface payloadChapter{
 export interface responseChapter {
   content: {
     record: number;
-    result:  chapter[]
-  }
+    result: chapter[];
+  };
 }
 
 export interface chapter {
@@ -637,4 +627,3 @@ export interface RegisterRequest {
   tcartype: string;
   tpoliceno: string;
 }
-

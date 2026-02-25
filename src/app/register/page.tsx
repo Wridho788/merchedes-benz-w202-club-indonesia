@@ -44,10 +44,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Fetch chapters and cities for dropdowns
-  const { data: chapterData, isLoading: isLoadingChapters } = useGetChapter({
-    limit: 100,
-    offset: 0,
-  });
+  const { data: chapterData, isLoading: isLoadingChapters } = useGetChapter();
   const { data: cityData, isLoading: isLoadingCities } = useGetCity();
 
   // Mutations
@@ -181,9 +178,9 @@ export default function RegisterPage() {
                   <option value="">
                     {isLoadingChapters ? "Memuat chapter..." : "Pilih Chapter"}
                   </option>
-                  {chapterData?.content?.result?.map((chapter) => (
+                  {chapterData?.content?.child?.map((chapter) => (
                     <option key={chapter.id} value={chapter.id}>
-                      {chapter.name}
+                      {chapter.desc}
                     </option>
                   ))}
                 </select>

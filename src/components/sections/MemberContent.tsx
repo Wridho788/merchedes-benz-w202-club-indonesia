@@ -86,7 +86,7 @@ export default function MemberContent() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative bg-brand-primary py-20">
+      <div className="relative bg-brand-primary py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <div className="inline-block bg-white px-6 py-2 rounded-md mb-4">
@@ -127,7 +127,7 @@ export default function MemberContent() {
                 </button>
               </a>
               {/** Use chapter phone if available, otherwise fallback to linktr.ee */}
-              {
+              {/* {
                 (() => {
                   const phoneRaw = chapterData?.content?.result?.phone;
                   const formatPhone = (p?: string) => {
@@ -166,11 +166,11 @@ export default function MemberContent() {
                     </a>
                   );
                 })()
-              }
+              } */}
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Benefits Section */}
       <section className="py-16 bg-gray-50">

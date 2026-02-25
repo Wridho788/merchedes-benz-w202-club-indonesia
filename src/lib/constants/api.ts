@@ -19,7 +19,7 @@ export const API_ENDPOINTS = {
   REQ_OTP: '/customer/req_otp',
   VERIFY: '/customer/verify/',
   GET_CITY: '/city/get_city',
-  GET_CHAPTER: '/chapter'
+  GET_CHAPTER: '/chapter/get_by_id/13',
 } as const;
 
 // Chapter ID constant
