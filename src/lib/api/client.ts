@@ -9,7 +9,6 @@ export const apiClient = axios.create({
   },
 });
 
-
 // API Functions
 export const fetchSliderWebsite = async (
   limit: string = "10",
@@ -54,6 +53,76 @@ export const fetchMembers = async (
   return response.data;
 };
 
+export const fetchMemberAdd = async (
+  payload: RegisterRequest,
+): Promise<ResponseMemberAdd> => {
+  const formData = new URLSearchParams();
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, String(value));
+  });
+  
+  const response = await apiClient.post<ResponseMemberAdd>(
+    API_ENDPOINTS.MEMBER_ADD,
+    formData.toString(),
+    {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }
+  );
+  return response.data;
+}
+
+// Request OTP
+export const fetchReqOtp = async (
+  payload: PayloadRequestOTP,
+): Promise<ResponseRequestOTP> => {
+  const response = await apiClient.post<ResponseRequestOTP>(
+    API_ENDPOINTS.REQ_OTP,
+    payload,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.data;
+}
+
+// Verify OTP
+export const fetchVerify = async (
+  customerId: string,
+  otp: string,
+): Promise<VerifyResponse> => {
+  const response = await apiClient.get<VerifyResponse>(
+    `${API_ENDPOINTS.VERIFY}${customerId}/${otp}`,
+  );
+  return response.data;
+}
+
+// Get Chapters
+export const fetchGetChapter = async (
+  payload: payloadChapter,
+): Promise<responseChapter> => {
+  const response = await apiClient.post<responseChapter>(
+    API_ENDPOINTS.GET_CHAPTER,
+    payload,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.data;
+}
+
+// Get Cities
+export const fetchGetCity = async (): Promise<CityResponse> => {
+  const response = await apiClient.get<CityResponse>(
+    API_ENDPOINTS.GET_CITY,
+  );
+  return response.data;
+}
 
 // Event API Functions
 export const fetchEventIndexWebsite = async (
@@ -111,12 +180,13 @@ export const fetchPartnerCities = async (): Promise<PartnerCityResponse> => {
   return response.data;
 };
 
-export const fetchPartnerCategories = async (): Promise<PartnerCategoryResponse> => {
-  const response = await apiClient.get<PartnerCategoryResponse>(
-    API_ENDPOINTS.PARTNER_CATEGORY,
-  );
-  return response.data;
-};
+export const fetchPartnerCategories =
+  async (): Promise<PartnerCategoryResponse> => {
+    const response = await apiClient.get<PartnerCategoryResponse>(
+      API_ENDPOINTS.PARTNER_CATEGORY,
+    );
+    return response.data;
+  };
 
 export const fetchPressConference = async (
   payload: ArticleIndexPayload,
@@ -140,7 +210,7 @@ export const fetchMediaCoverage = async (
 
 export const fetchMediaCoverageById = async (
   articleId: string,
-): Promise<ArticleResponse> => { 
+): Promise<ArticleResponse> => {
   const response = await apiClient.get<ArticleResponse>(
     `${API_ENDPOINTS.ARTICLE_INDEX_WEBSITE}/${articleId}`,
   );
@@ -371,21 +441,21 @@ export interface PartnerDetailResponse {
   content: {
     image_url: string;
     result: PartnerItem;
-  }
+  };
 }
 
 export interface PartnerCityResponse {
   content: {
     record: number;
     result: PartnerCityname[];
-  }
+  };
 }
 
 export interface PartnerCategoryResponse {
   content: {
     record: number;
     result: PartnerCategory[];
-  }
+  };
 }
 
 export interface PartnerCityname {
@@ -396,12 +466,11 @@ export interface PartnerCategory {
   category: string;
 }
 
-
 export interface PressRelaseResponse {
   content: {
     record: number;
     result: PressRelase[];
-  }
+  };
 }
 
 export interface PressRelase {
@@ -422,4 +491,138 @@ export interface PressRelase {
   publish?: string;
   front: string;
   permalink: string;
+}
+
+export interface ResponseMemberAdd {
+  content: {
+    id: string;
+    quinos_id: string | null;
+    clubid: string;
+    first_name: string;
+    last_name: string | null;
+    type: string;
+    address: string;
+    shipping_address: string;
+    province_name: string | null;
+    city_name: string | null;
+    district_name: string | null;
+    shipping_province: string | null;
+    shipping_city: string | null;
+    shipping_district: string | null;
+    phone1: string;
+    phone2: string;
+    fax: string;
+    email: string;
+    password: string;
+    website: string;
+    state: string;
+    city: string;
+    region: string;
+    zip: string;
+    notes: string;
+    image: string | null;
+    npwp: string | null;
+    profession: string | null;
+    organization: string | null;
+    member_no: string;
+    instagram: string | null;
+    joined: string;
+    premium: string;
+    status: string;
+    voucher_claimed: string;
+    mtype: string;
+    dob: string;
+    nik: string;
+    car_type: string;
+    chasis_no: string | null;
+    engine_no: string | null;
+    police_no: string;
+    car_image: string | null;
+    expired: string | null;
+    verified: string;
+    billing_num: string;
+    isfeatured: string;
+    created: string;
+    updated: string | null;
+    deleted: string | null;
+  };
+}
+
+export interface PayloadRequestOTP {
+  username: string;
+}
+
+export interface ResponseRequestOTP {
+  content: string;
+}
+
+export interface payloadChapter{
+  limit: number;
+  offset: number;
+}
+
+export interface responseChapter {
+  content: {
+    record: number;
+    result:  chapter[]
+  }
+}
+
+export interface chapter {
+  id: string;
+  code: string;
+  name: string;
+  desc: string;
+  instagram: string;
+  image: string;
+  bank1: string;
+  bank2: string;
+  bank3: string;
+  city: string;
+  email: string;
+  phone: string;
+  address: string;
+  chief: string;
+  vice: string;
+  treasurer: string;
+  billing_contact: string;
+  members: number;
+}
+
+// City types
+export interface City {
+  id: string;
+  id_prov: string;
+  province: string;
+  type: string;
+  nama: string;
+  zip: string;
+}
+
+export interface CityResponse {
+  content: City[];
+}
+
+// Verify Response
+export interface VerifyResponse {
+  content: {
+    success: boolean;
+    message?: string;
+  };
+}
+
+// Register Request payload
+export interface RegisterRequest {
+  cchapter: string;
+  tname: string;
+  taddress: string;
+  tzip: string;
+  tphone1: string;
+  temail: string;
+  ccity: string;
+  tpassword: string;
+  tdob: string;
+  tnik: string;
+  tcartype: string;
+  tpoliceno: string;
 }

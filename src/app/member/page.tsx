@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import MemberContent from '@/components/sections/MemberContent'
 import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp'
+import FloatingJoinButton from '@/components/ui/FloatingJoinButton'
 
 export const metadata: Metadata = {
   title: 'Member MBW202CI | Direktori Anggota Mercedes Benz W202 Club Indonesia',
@@ -32,6 +33,7 @@ export default function MemberPage() {
   return (
     <div className="page-wrapper">
       <MemberContent />
+      <FloatingJoinButton />
       <FloatingWhatsApp />
     </div>
   )

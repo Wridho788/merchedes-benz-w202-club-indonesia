@@ -15,6 +15,11 @@ export const API_ENDPOINTS = {
   PARTNER_CITY: '/partner/city',
   PARTNER_CATEGORY: '/partner/category',
   GET_PERMALINK: 'article/get_by_permalink/',
+  MEMBER_ADD: '/customer/add',
+  REQ_OTP: '/customer/req_otp',
+  VERIFY: '/customer/verify/',
+  GET_CITY: '/city/get_city',
+  GET_CHAPTER: '/chapter'
 } as const;
 
 // Chapter ID constant
