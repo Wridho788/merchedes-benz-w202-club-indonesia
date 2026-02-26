@@ -118,7 +118,7 @@ function VerifyContent() {
       Swal.fire({
         icon: "success",
         title: "Verifikasi Berhasil!",
-        text: "Akun Anda telah berhasil diverifikasi. Selamat bergabung dengan MBW202CI!",
+        text: "Akun Anda telah berhasil diverifikasi. Selamat bergabung dengan Mercedes Benz W202 Club Indonesia!",
         confirmButtonText: "Lanjut ke Dashboard",
       }).then(() => {
         router.push("/dashboard");

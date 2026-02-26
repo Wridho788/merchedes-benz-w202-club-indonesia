@@ -31,6 +31,7 @@ export default function HomeHero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [imageError, setImageError] = useState<Record<number, boolean>>({});
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [firstImageLoaded, setFirstImageLoaded] = useState(false);
   const { data, isLoading, error } = useSliderWebsite("10", "0");
 
   // Use API data if available, fallback to static data only on error
@@ -48,7 +49,8 @@ export default function HomeHero() {
   // Track image loading
   const [loadedCount, setLoadedCount] = useState(0);
 
-  const handleImageLoad = () => {
+  const handleImageLoad = (index: number) => {
+    if (index === 0) setFirstImageLoaded(true);
     setLoadedCount((prev) => prev + 1);
   };
 
@@ -63,6 +65,7 @@ export default function HomeHero() {
   useEffect(() => {
     setLoadedCount(0);
     setImagesLoaded(false);
+    setFirstImageLoaded(false);
   }, [data, error]);
 
   useEffect(() => {
@@ -112,8 +115,8 @@ export default function HomeHero() {
 
   return (
     <section className="relative h-[700px] md:h-[600px] lg:h-[700px] overflow-hidden">
-      {/* Loading State - tampil saat loading API atau images belum selesai load */}
-      {(isLoading || (slides.length > 0 && !imagesLoaded)) && (
+      {/* Loading State - tampil saat loading API atau gambar pertama belum selesai load */}
+      {(isLoading || (slides.length > 0 && !firstImageLoaded)) && (
         <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-40">
           <div className="animate-pulse text-white">Loading...</div>
         </div>
@@ -135,9 +138,8 @@ export default function HomeHero() {
             sizes="100vw"
             className="object-cover"
             priority={index === 0}
-            onLoad={handleImageLoad}
+            onLoad={() => handleImageLoad(index)}
             onError={() => handleImageError(slide.id)}
-            unoptimized={slide.image.startsWith("http")}
           />
           {/* Dark Overlay */}
           <div className="absolute inset-0 bg-black/40 z-10" />
@@ -227,7 +229,7 @@ export default function HomeHero() {
               key={index}
               onClick={() => goToSlide(index)}
               className={clsx(
-                "w-3 h-3 rounded-full transition-colors",
+                "w-6 h-6 rounded-full transition-colors",
                 index === currentSlide
                   ? "bg-white"
                   : "bg-white/50 hover:bg-white/70"

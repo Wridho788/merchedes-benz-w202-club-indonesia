@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import HomeHero from '@/components/sections/HomeHero'
 import HomeHistory from '@/components/sections/HomeHistory'
 import HomeCommunity from '@/components/sections/HomeCommunity'
 import HomeOrganization from '@/components/sections/HomeOrganization'
 import HomeEvent from '@/components/sections/HomeEvent'
-import HomePressRelease from '@/components/sections/HomePressRelease'
-import HomeFeaturedMembers from '@/components/sections/HomeFeaturedMembers'
-import HomeCTA from '@/components/sections/HomeCTA'
-import FloatingWhatsApp from '@/components/ui/FloatingWhatsApp'
+
+// Lazy load section di bawah fold untuk mengurangi initial bundle
+const HomePressRelease = dynamic(() => import('@/components/sections/HomePressRelease'))
+const HomeFeaturedMembers = dynamic(() => import('@/components/sections/HomeFeaturedMembers'))
+const HomeCTA = dynamic(() => import('@/components/sections/HomeCTA'))
+const FloatingWhatsApp = dynamic(() => import('@/components/ui/FloatingWhatsApp'))
 
 export const metadata: Metadata = {
   title: 'Mercedes Benz W202 Club Indonesia | Komunitas Pecinta Mercedes W202',

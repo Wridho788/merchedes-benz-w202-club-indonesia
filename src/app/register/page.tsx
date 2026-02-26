@@ -146,7 +146,7 @@ export default function RegisterPage() {
           <div className="text-center mb-8">
             <div className="inline-block bg-brand-primary px-6 py-2 rounded-md mb-4">
               <h1 className="text-2xl md:text-3xl font-sans font-bold text-white">
-                Bergabung dengan MBW202CI
+                Bergabung dengan Mercedes Benz W202 Club Indonesia
               </h1>
             </div>
             <div className="w-24 h-1 bg-brand-accent mx-auto mb-4"></div>

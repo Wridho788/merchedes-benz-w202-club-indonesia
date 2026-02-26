@@ -17,6 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://mbw202clubindonesia.vercel.app'),
   title: {
     default: 'Mercedes Benz W202 Club Indonesia',
     template: '%s | Mercedes Benz W202 Club Indonesia',
