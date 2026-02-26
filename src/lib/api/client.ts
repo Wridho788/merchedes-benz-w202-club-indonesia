@@ -56,14 +56,21 @@ export const fetchMembers = async (
 export const fetchMemberAdd = async (
   payload: RegisterRequest,
 ): Promise<ResponseMemberAdd> => {
-  const response = await apiClient.post<ApiResponseMemberAdd>(
-    API_ENDPOINTS.MEMBER_ADD,
-    payload,
-  );
-  return {
-    content: response.data.content,
-    status: response.status,
-  };
+  try {
+    const response = await apiClient.post<ApiResponseMemberAdd>(
+      API_ENDPOINTS.MEMBER_ADD,
+      payload,
+    );
+    return {
+      content: response.data.content,
+      status: response.status,
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error.trim());
+    }
+    throw error;
+  }
 };
 
 // Request OTP
@@ -95,10 +102,17 @@ export const fetchVerify = async (
   customerId: string,
   otp: string,
 ): Promise<VerifyResponse> => {
-  const response = await apiClient.get<VerifyResponse>(
-    `${API_ENDPOINTS.VERIFY}${customerId}/${otp}`,
-  );
-  return response.data;
+  try {
+    const response = await apiClient.get<VerifyResponse>(
+      `${API_ENDPOINTS.VERIFY}${customerId}/${otp}`,
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error) {
+      throw new Error(error.response.data.error.trim());
+    }
+    throw error;
+  }
 };
 
 // Get Chapters
