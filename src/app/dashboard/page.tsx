@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Mercedes Benz W202 Club Indonesia',
-  description: 'Dashboard member Mercedes Benz W202 Club Indonesia',
-}
+  title: "Dashboard | Mercedes Benz W202 Club Indonesia",
+  description: "Dashboard member Mercedes Benz W202 Club Indonesia",
+};
 
 export default function DashboardPage() {
   return (
@@ -48,8 +48,9 @@ export default function DashboardPage() {
                 Registrasi Berhasil!
               </h2>
               <p className="text-gray-600 mb-6">
-                Selamat! Anda telah resmi menjadi anggota Mercedes Benz W202 Club Indonesia.
-                Tim kami akan segera menghubungi Anda untuk informasi lebih lanjut.
+                Selamat! Anda telah berhasil melakukan pendaftaran anggota
+                Mercedes Benz W202 ClubIndonesia. Tim kami akan segera
+                menghubungi Anda untuk informasi lebih lanjut.
               </p>
 
               {/* Action Buttons */}
@@ -97,7 +98,8 @@ export default function DashboardPage() {
                 Butuh Bantuan?
               </h3>
               <p className="text-gray-600 mb-4">
-                Jika Anda memiliki pertanyaan, silakan hubungi admin kami melalui WhatsApp.
+                Jika Anda memiliki pertanyaan, silakan hubungi admin kami
+                melalui WhatsApp.
               </p>
               <a
                 href="https://wa.me/6281234567890"
@@ -125,5 +127,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
